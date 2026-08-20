@@ -1,47 +1,82 @@
 "use client";
 
-import { useState } from "react";
-
-const timeSlots = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-  "17:00",
-  "17:30",
-  "18:00",
-  "18:30",
-];
-
-const barbers = [
-  { id: 1, name: "Carlos", specialty: "Degradê e Cortes Modernos" },
-  { id: 2, name: "Rafael", specialty: "Barba e Navalha" },
-  { id: 3, name: "Lucas", specialty: "Cortes Classicos" },
-];
+import { useState, useEffect } from "react";
+import {
+  createAppointment,
+  getBarbers,
+  getServices,
+} from "@/lib/actions";
+import type { Barber, Service } from "@/lib/supabase";
 
 export default function SchedulingSection() {
+  const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedBarber, setSelectedBarber] = useState<number | null>(null);
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [barbersData, servicesData] = await Promise.all([
+          getBarbers(),
+          getServices(),
+        ]);
+        setBarbers(barbersData);
+        setServices(servicesData);
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  const timeSlots = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedDate && selectedTime && selectedBarber && selectedService && clientName && clientPhone) {
+    if (
+      !selectedDate ||
+      !selectedTime ||
+      !selectedBarber ||
+      !selectedServiceId ||
+      !clientName ||
+      !clientPhone
+    ) {
+      setError("Preencha todos os campos");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await createAppointment({
+        client_name: clientName,
+        client_phone: clientPhone,
+        service_id: selectedServiceId,
+        barber_id: selectedBarber,
+        appointment_date: selectedDate,
+        appointment_time: selectedTime,
+      });
       setShowConfirm(true);
+    } catch (err) {
+      setError("Erro ao agendar. Tente novamente.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,8 +85,19 @@ export default function SchedulingSection() {
     return today.toISOString().split("T")[0];
   };
 
+  const getSelectedServiceName = () => {
+    return services.find((s) => s.id === selectedServiceId)?.name || "";
+  };
+
+  const getSelectedBarberName = () => {
+    return barbers.find((b) => b.id === selectedBarber)?.name || "";
+  };
+
   return (
-    <section id="scheduling" className="py-24 bg-brand-dark relative overflow-hidden">
+    <section
+      id="scheduling"
+      className="py-24 bg-brand-dark relative overflow-hidden"
+    >
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-orange/5 rounded-full blur-[128px] pointer-events-none" />
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
@@ -68,7 +114,17 @@ export default function SchedulingSection() {
         {showConfirm ? (
           <div className="max-w-lg mx-auto bg-brand-black rounded-2xl p-8 border border-brand-orange/30 text-center animate-fade-in-up">
             <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#F97316"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M20 6 9 17l-5-5" />
               </svg>
             </div>
@@ -76,17 +132,33 @@ export default function SchedulingSection() {
               Agendamento Confirmado!
             </h3>
             <p className="text-gray-400 mb-6">
-              Seu horario foi agendado com sucesso. Enviamos os detalhes para seu WhatsApp.
+              Seu horario foi agendado com sucesso. Aguardamos voce!
             </p>
             <div className="bg-white/5 rounded-xl p-4 mb-6 text-left">
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-gray-500">Servico:</span></div>
-                <div className="text-white font-medium">{selectedService}</div>
-                <div><span className="text-gray-500">Barbeiro:</span></div>
-                <div className="text-white font-medium">{barbers.find(b => b.id === selectedBarber)?.name}</div>
-                <div><span className="text-gray-500">Data:</span></div>
-                <div className="text-white font-medium">{new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR")}</div>
-                <div><span className="text-gray-500">Horario:</span></div>
+                <div>
+                  <span className="text-gray-500">Servico:</span>
+                </div>
+                <div className="text-white font-medium">
+                  {getSelectedServiceName()}
+                </div>
+                <div>
+                  <span className="text-gray-500">Barbeiro:</span>
+                </div>
+                <div className="text-white font-medium">
+                  {getSelectedBarberName()}
+                </div>
+                <div>
+                  <span className="text-gray-500">Data:</span>
+                </div>
+                <div className="text-white font-medium">
+                  {new Date(selectedDate + "T12:00:00").toLocaleDateString(
+                    "pt-BR"
+                  )}
+                </div>
+                <div>
+                  <span className="text-gray-500">Horario:</span>
+                </div>
                 <div className="text-white font-medium">{selectedTime}</div>
               </div>
             </div>
@@ -96,7 +168,7 @@ export default function SchedulingSection() {
                 setSelectedDate("");
                 setSelectedTime("");
                 setSelectedBarber(null);
-                setSelectedService("");
+                setSelectedServiceId(null);
                 setClientName("");
                 setClientPhone("");
               }}
@@ -142,20 +214,20 @@ export default function SchedulingSection() {
                     Servico
                   </label>
                   <select
-                    value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
+                    value={selectedServiceId || ""}
+                    onChange={(e) =>
+                      setSelectedServiceId(Number(e.target.value))
+                    }
                     className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   >
                     <option value="">Selecione o servico</option>
-                    <option value="Corte Classico - R$45">Corte Classico - R$ 45</option>
-                    <option value="Corte + Barba - R$70">Corte + Barba - R$ 70</option>
-                    <option value="Barba Completa - R$35">Barba Completa - R$ 35</option>
-                    <option value="Degradê - R$55">Degradê - R$ 55</option>
-                    <option value="Corte Infantil - R$30">Corte Infantil - R$ 30</option>
-                    <option value="Sobrancelha - R$15">Sobrancelha - R$ 15</option>
-                    <option value="Hidratacao Capilar - R$40">Hidratacao Capilar - R$ 40</option>
-                    <option value="Pigmentacao - R$50">Pigmentacao - R$ 50</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.name} - R$ {service.price} (
+                        {service.duration_minutes} min)
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -175,8 +247,12 @@ export default function SchedulingSection() {
                             : "border-white/10 bg-brand-black text-gray-400 hover:border-white/20"
                         }`}
                       >
-                        <div className="text-white font-medium text-sm">{barber.name}</div>
-                        <div className="text-xs mt-1 opacity-70">{barber.specialty.split(" ")[0]}</div>
+                        <div className="text-white font-medium text-sm">
+                          {barber.name}
+                        </div>
+                        <div className="text-xs mt-1 opacity-70">
+                          {barber.specialty.split(" ")[0]}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -205,7 +281,7 @@ export default function SchedulingSection() {
                   <div className="grid grid-cols-3 gap-2">
                     {timeSlots.map((time) => {
                       const isUnavailable =
-                        (time === "12:00" || time === "12:30" || time === "19:00");
+                        time === "12:00" || time === "12:30" || time === "19:00";
                       return (
                         <button
                           key={time}
@@ -227,15 +303,20 @@ export default function SchedulingSection() {
                   </div>
                 </div>
 
+                {error && (
+                  <p className="text-red-400 text-sm text-center">{error}</p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full mt-6 px-8 py-4 bg-brand-orange text-brand-black rounded-full font-bold text-lg hover:bg-brand-orange-light transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]"
+                  disabled={loading}
+                  className="w-full mt-6 px-8 py-4 bg-brand-orange text-brand-black rounded-full font-bold text-lg hover:bg-brand-orange-light transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Confirmar Agendamento
+                  {loading ? "Agendando..." : "Confirmar Agendamento"}
                 </button>
 
                 <p className="text-center text-gray-500 text-sm mt-4">
-                  Voce recebera uma confirmacao via WhatsApp
+                  Seu horario sera salvo automaticamente
                 </p>
               </div>
             </div>

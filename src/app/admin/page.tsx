@@ -104,7 +104,7 @@ export default function AdminPage() {
       >
         <div className="p-6 border-b border-white/5">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/images/logo.svg" alt="Logo" className="w-10 h-10" />
+            <img src="/images/logo.png" alt="Logo" className="w-10 h-10" />
             <div>
               <h1 className="text-lg font-bold text-white">Dreamer</h1>
               <p className="text-xs text-gray-500">Painel Admin</p>

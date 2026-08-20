@@ -8,7 +8,7 @@ export default function AboutSection() {
           <div className="w-full md:w-1/2 flex justify-center animate-fade-in-left opacity-0">
             <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full border-4 border-brand-orange/30 shadow-[0_0_40px_rgba(249,115,22,0.2)] overflow-hidden">
               <img
-                src="/images/logo.svg"
+                src="/images/logo.png"
                 alt="Barbearia Dreamer"
                 className="w-full h-full object-cover p-8"
               />

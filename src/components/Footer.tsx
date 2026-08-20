@@ -8,7 +8,7 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center gap-3 group mb-4">
               <img
-                src="/images/logo.svg"
+                src="/images/logo.png"
                 alt="Barbearia Dreamer"
                 className="w-10 h-10 group-hover:scale-110 transition-transform"
               />

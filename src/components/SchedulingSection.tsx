@@ -125,6 +125,23 @@ export default function SchedulingSection() {
         }
       }
 
+      try {
+        await fetch("/api/email/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientName,
+            clientPhone,
+            serviceName: service?.name,
+            barberName: barber?.name,
+            date: selectedDate,
+            time: selectedTime,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Erro ao enviar email:", emailErr);
+      }
+
       setShowConfirm(true);
     } catch (err) {
       setError("Erro ao agendar. Tente novamente.");
@@ -378,10 +395,10 @@ export default function SchedulingSection() {
                             onClick={() => setSelectedTime(time)}
                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                               !isAvailable
-                                ? "bg-white/3 text-gray-600 cursor-not-allowed line-through"
+                                ? "bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700"
                                 : selectedTime === time
-                                  ? "bg-brand-orange text-brand-black"
-                                  : "bg-brand-black border border-white/10 text-gray-400 hover:border-brand-orange/30"
+                                  ? "bg-brand-orange text-brand-black shadow-lg shadow-brand-orange/30"
+                                  : "bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25 hover:border-green-500/50"
                             }`}
                           >
                             {time}
@@ -397,12 +414,12 @@ export default function SchedulingSection() {
                         <span className="text-gray-500">Selecionado</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded bg-brand-black border border-white/10" />
+                        <div className="w-3 h-3 rounded bg-green-500/15 border border-green-500/30" />
                         <span className="text-gray-500">Disponivel</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded bg-white/5 border border-white/5" />
-                        <span className="text-gray-500">Ocupado</span>
+                        <div className="w-3 h-3 rounded bg-gray-800 border border-gray-700" />
+                        <span className="text-gray-500">Indisponivel</span>
                       </div>
                     </div>
                   )}

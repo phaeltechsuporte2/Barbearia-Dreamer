@@ -24,9 +24,9 @@ export default function Header() {
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <img
-            src="/images/logo.png"
+            src="/images/logo.jpg"
             alt="Barbearia Dreamer"
-            className="w-10 h-10 rounded-lg object-cover transition-transform group-hover:scale-110"
+            className="w-12 h-12 rounded-full object-cover transition-transform group-hover:scale-110"
           />
           <span className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-orange to-brand-gold">
             Barbearia Dreamer

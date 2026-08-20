@@ -8,9 +8,9 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center gap-3 group mb-4">
               <img
-                src="/images/logo.png"
+                src="/images/logo.jpg"
                 alt="Barbearia Dreamer"
-                className="w-10 h-10 rounded-lg object-cover group-hover:scale-110 transition-transform"
+                className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform"
               />
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-orange to-brand-gold">
                 Barbearia Dreamer

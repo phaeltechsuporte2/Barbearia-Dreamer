@@ -5,16 +5,28 @@ const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!;
 const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n")!;
 
 function getAuth() {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const key = process.env.GOOGLE_PRIVATE_KEY;
+  
+  if (!email || !key) {
+    throw new Error(`Missing Google Calendar env vars: GOOGLE_SERVICE_ACCOUNT_EMAIL=${email ? 'SET' : 'MISSING'}, GOOGLE_PRIVATE_KEY=${key ? 'SET' : 'MISSING'}`);
+  }
+
   return new google.auth.GoogleAuth({
     credentials: {
-      client_email: serviceAccountEmail,
-      private_key: privateKey,
+      client_email: email,
+      private_key: key.replace(/\\n/g, "\n"),
     },
     scopes: ["https://www.googleapis.com/auth/calendar"],
   });
 }
 
 export async function getAvailableSlots(date: string) {
+  const calId = process.env.GOOGLE_CALENDAR_ID;
+  if (!calId) {
+    throw new Error("Missing GOOGLE_CALENDAR_ID env var");
+  }
+
   const auth = getAuth();
   const calendar = google.calendar({ version: "v3", auth });
 
@@ -61,6 +73,11 @@ export async function createCalendarEvent(event: {
   time: string;
   durationMinutes: number;
 }) {
+  const calId = process.env.GOOGLE_CALENDAR_ID;
+  if (!calId) {
+    throw new Error("Missing GOOGLE_CALENDAR_ID env var");
+  }
+
   const auth = getAuth();
   const calendar = google.calendar({ version: "v3", auth });
 

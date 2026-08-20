@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     const slots = await getAvailableSlots(date);
     return NextResponse.json({ slots });
   } catch (error) {
-    console.error("Error fetching available slots:", error);
+    console.error("Error fetching available slots:", JSON.stringify(error, Object.getOwnPropertyNames(error as object)));
     return NextResponse.json(
-      { error: "Failed to fetch available slots" },
+      { error: "Failed to fetch available slots", details: String(error) },
       { status: 500 }
     );
   }

@@ -10,7 +10,7 @@ export default function Footer() {
               <img
                 src="/images/logo.png"
                 alt="Barbearia Dreamer"
-                className="w-10 h-10 group-hover:scale-110 transition-transform"
+                className="w-10 h-10 rounded-lg object-cover group-hover:scale-110 transition-transform"
               />
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-orange to-brand-gold">
                 Barbearia Dreamer

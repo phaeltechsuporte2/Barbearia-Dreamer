@@ -10,7 +10,7 @@ export default function AboutSection() {
               <img
                 src="/images/logo.png"
                 alt="Barbearia Dreamer"
-                className="w-full h-full object-cover p-8"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>

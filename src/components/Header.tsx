@@ -53,6 +53,12 @@ export default function Header() {
             Servicos
           </a>
           <a
+            href="#plans"
+            className="hover:text-brand-orange transition-colors font-medium"
+          >
+            Planos
+          </a>
+          <a
             href="#scheduling"
             className="hover:text-brand-orange transition-colors font-medium"
           >
@@ -120,6 +126,13 @@ export default function Header() {
               className="hover:text-brand-orange transition-colors font-medium text-lg"
             >
               Servicos
+            </a>
+            <a
+              href="#plans"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-brand-orange transition-colors font-medium text-lg"
+            >
+              Planos
             </a>
             <a
               href="#scheduling"

@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  createAppointment,
-  getBarbers,
-  getServices,
-} from "@/lib/actions";
+import { useState, useEffect, useCallback } from "react";
+import { createAppointment, getBarbers, getServices } from "@/lib/actions";
 import type { Barber, Service } from "@/lib/supabase";
 
 export default function SchedulingSection() {
@@ -21,7 +17,10 @@ export default function SchedulingSection() {
   const [clientPhone, setClientPhone] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [calendarConnected, setCalendarConnected] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -39,11 +38,44 @@ export default function SchedulingSection() {
     loadData();
   }, []);
 
-  const timeSlots = [
-    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
-  ];
+  const fetchAvailableSlots = useCallback(async (date: string) => {
+    if (!date) return;
+
+    setLoadingSlots(true);
+    try {
+      const response = await fetch(
+        `/api/calendar/available?date=${date}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableSlots(data.slots);
+        setCalendarConnected(true);
+      } else {
+        setAvailableSlots([
+          "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+          "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+          "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+        ]);
+        setCalendarConnected(false);
+      }
+    } catch {
+      setAvailableSlots([
+        "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+        "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+        "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+      ]);
+      setCalendarConnected(false);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAvailableSlots(selectedDate);
+      setSelectedTime("");
+    }
+  }, [selectedDate, fetchAvailableSlots]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +95,9 @@ export default function SchedulingSection() {
     setError("");
 
     try {
+      const service = services.find((s) => s.id === selectedServiceId);
+      const barber = barbers.find((b) => b.id === selectedBarber);
+
       await createAppointment({
         client_name: clientName,
         client_phone: clientPhone,
@@ -71,6 +106,25 @@ export default function SchedulingSection() {
         appointment_date: selectedDate,
         appointment_time: selectedTime,
       });
+
+      if (calendarConnected && service && barber) {
+        try {
+          await fetch("/api/calendar/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              summary: `${service.name} - ${clientName}`,
+              description: `Barbeiro: ${barber.name}\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServico: ${service.name}\nValor: R$ ${service.price}`,
+              date: selectedDate,
+              time: selectedTime,
+              durationMinutes: service.duration_minutes,
+            }),
+          });
+        } catch (calErr) {
+          console.error("Erro ao criar evento no Google Calendar:", calErr);
+        }
+      }
+
       setShowConfirm(true);
     } catch (err) {
       setError("Erro ao agendar. Tente novamente.");
@@ -93,6 +147,12 @@ export default function SchedulingSection() {
     return barbers.find((b) => b.id === selectedBarber)?.name || "";
   };
 
+  const allTimeSlots = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+  ];
+
   return (
     <section
       id="scheduling"
@@ -107,8 +167,17 @@ export default function SchedulingSection() {
             <span className="text-brand-orange">Horario</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-100 opacity-0">
-            Escolha o melhor horario para voce. Rapido, facil e pratico.
+            Escolha o melhor horario para voce. Horarios atualizados em tempo
+            real.
           </p>
+          {calendarConnected && (
+            <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-green-400 text-sm font-medium">
+                Sincronizado com Google Calendar
+              </span>
+            </div>
+          )}
         </div>
 
         {showConfirm ? (
@@ -132,7 +201,9 @@ export default function SchedulingSection() {
               Agendamento Confirmado!
             </h3>
             <p className="text-gray-400 mb-6">
-              Seu horario foi agendado com sucesso. Aguardamos voce!
+              Seu horario foi agendado com sucesso
+              {calendarConnected && " e sincronizado com o Google Calendar"}.
+              Aguardamos voce!
             </p>
             <div className="bg-white/5 rounded-xl p-4 mb-6 text-left">
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -171,6 +242,7 @@ export default function SchedulingSection() {
                 setSelectedServiceId(null);
                 setClientName("");
                 setClientPhone("");
+                setAvailableSlots([]);
               }}
               className="px-8 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all"
             >
@@ -277,30 +349,63 @@ export default function SchedulingSection() {
                 <div>
                   <label className="block text-white font-semibold mb-3">
                     Horario
+                    {loadingSlots && (
+                      <span className="text-brand-orange text-sm font-normal ml-2">
+                        Atualizando...
+                      </span>
+                    )}
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {timeSlots.map((time) => {
-                      const isUnavailable =
-                        time === "12:00" || time === "12:30" || time === "19:00";
-                      return (
-                        <button
-                          key={time}
-                          type="button"
-                          disabled={isUnavailable}
-                          onClick={() => setSelectedTime(time)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            isUnavailable
-                              ? "bg-white/3 text-gray-600 cursor-not-allowed line-through"
-                              : selectedTime === time
-                                ? "bg-brand-orange text-brand-black"
-                                : "bg-brand-black border border-white/10 text-gray-400 hover:border-brand-orange/30"
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {!selectedDate ? (
+                    <div className="text-center py-8 text-gray-500">
+                      Selecione uma data para ver os horarios disponiveis
+                    </div>
+                  ) : loadingSlots ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="w-6 h-6 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
+                      <span className="ml-3 text-gray-400">
+                        Carregando horarios...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {allTimeSlots.map((time) => {
+                        const isAvailable = availableSlots.includes(time);
+                        return (
+                          <button
+                            key={time}
+                            type="button"
+                            disabled={!isAvailable}
+                            onClick={() => setSelectedTime(time)}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                              !isAvailable
+                                ? "bg-white/3 text-gray-600 cursor-not-allowed line-through"
+                                : selectedTime === time
+                                  ? "bg-brand-orange text-brand-black"
+                                  : "bg-brand-black border border-white/10 text-gray-400 hover:border-brand-orange/30"
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {selectedDate && !loadingSlots && (
+                    <div className="flex items-center gap-4 mt-3 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-brand-orange" />
+                        <span className="text-gray-500">Selecionado</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-brand-black border border-white/10" />
+                        <span className="text-gray-500">Disponivel</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded bg-white/5 border border-white/5" />
+                        <span className="text-gray-500">Ocupado</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {error && (
@@ -309,14 +414,16 @@ export default function SchedulingSection() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !selectedTime}
                   className="w-full mt-6 px-8 py-4 bg-brand-orange text-brand-black rounded-full font-bold text-lg hover:bg-brand-orange-light transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Agendando..." : "Confirmar Agendamento"}
                 </button>
 
                 <p className="text-center text-gray-500 text-sm mt-4">
-                  Seu horario sera salvo automaticamente
+                  {calendarConnected
+                    ? "Sincronizado com Google Calendar"
+                    : "Seu horario sera salvo automaticamente"}
                 </p>
               </div>
             </div>

@@ -53,6 +53,14 @@ export default function Footer() {
               </li>
               <li>
                 <a
+                  href="#plans"
+                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                >
+                  Planos
+                </a>
+              </li>
+              <li>
+                <a
                   href="#scheduling"
                   className="text-gray-400 hover:text-brand-orange transition-colors"
                 >

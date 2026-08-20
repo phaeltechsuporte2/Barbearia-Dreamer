@@ -1,12 +1,6 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface EmailData {
   clientName: string;
@@ -42,14 +36,14 @@ export async function sendConfirmationEmail(data: EmailData) {
               <tr>
                 <td style="background: linear-gradient(135deg, #F97316, #F59E0B); padding:30px; text-align:center;">
                   <h1 style="color:#0a0a0a;margin:0;font-size:24px;font-weight:800;">Barbearia Dreamer</h1>
-                  <p style="color:#0a0a0a;margin:5px 0 0;opacity:0.8;font-size:14px;">Seu Estilo, Nosso Arte</p>
+                  <p style="color:#0a0a0a;margin:5px 0 0;opacity:0.8;font-size:14px;">Seu Estilo, Nossa Arte</p>
                 </td>
               </tr>
               <tr>
                 <td style="padding:30px;">
                   <div style="text-align:center;margin-bottom:30px;">
-                    <div style="width:60px;height:60px;background-color:rgba(34,197,94,0.2);border-radius:50%;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;">
-                      <span style="color:#22C55E;font-size:28px;">&#10003;</span>
+                    <div style="width:60px;height:60px;background-color:rgba(34,197,94,0.2);border-radius:50%;margin:0 auto 15px;">
+                      <span style="color:#22C55E;font-size:28px;line-height:60px;">&#10003;</span>
                     </div>
                     <h2 style="color:#ffffff;margin:0;font-size:22px;">Agendamento Confirmado!</h2>
                     <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Um novo agendamento foi realizado</p>
@@ -63,37 +57,27 @@ export async function sendConfirmationEmail(data: EmailData) {
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">Cliente</td>
                             <td style="padding:8px 0;color:#ffffff;font-size:14px;font-weight:600;text-align:right;">${data.clientName}</td>
                           </tr>
-                          <tr>
-                            <td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td>
-                          </tr>
+                          <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">WhatsApp</td>
                             <td style="padding:8px 0;color:#ffffff;font-size:14px;font-weight:600;text-align:right;">${data.clientPhone}</td>
                           </tr>
-                          <tr>
-                            <td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td>
-                          </tr>
+                          <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">Servico</td>
                             <td style="padding:8px 0;color:#F97316;font-size:14px;font-weight:600;text-align:right;">${data.serviceName}</td>
                           </tr>
-                          <tr>
-                            <td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td>
-                          </tr>
+                          <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">Barbeiro</td>
                             <td style="padding:8px 0;color:#ffffff;font-size:14px;font-weight:600;text-align:right;">${data.barberName}</td>
                           </tr>
-                          <tr>
-                            <td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td>
-                          </tr>
+                          <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">Data</td>
                             <td style="padding:8px 0;color:#ffffff;font-size:14px;font-weight:600;text-align:right;">${formattedDate}</td>
                           </tr>
-                          <tr>
-                            <td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td>
-                          </tr>
+                          <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
                             <td style="padding:8px 0;color:#6B7280;font-size:13px;">Horario</td>
                             <td style="padding:8px 0;color:#22C55E;font-size:16px;font-weight:700;text-align:right;">${data.time}</td>
@@ -121,15 +105,13 @@ export async function sendConfirmationEmail(data: EmailData) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"Barbearia Dreamer" <${process.env.EMAIL_USER}>`,
-    to: "phael.techsuporte2@gmail.com",
-    subject: `Novo Agendamento - ${data.clientName} - ${data.serviceName}`,
-    html: htmlContent,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await resend.emails.send({
+      from: "Barbearia Dreamer <onboarding@resend.dev>",
+      to: "phael.techsuporte2@gmail.com",
+      subject: `Novo Agendamento - ${data.clientName} - ${data.serviceName}`,
+      html: htmlContent,
+    });
     return { success: true };
   } catch (error) {
     console.error("Erro ao enviar email:", error);

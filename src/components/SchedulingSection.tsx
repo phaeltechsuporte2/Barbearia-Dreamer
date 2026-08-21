@@ -4,6 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import { createAppointment, getBarbers, getServices } from "@/lib/actions";
 import type { Barber, Service } from "@/lib/supabase";
 
+const maskPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length === 0) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
 export default function SchedulingSection() {
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -291,8 +299,10 @@ export default function SchedulingSection() {
                   <input
                     type="tel"
                     value={clientPhone}
-                    onChange={(e) => setClientPhone(e.target.value)}
-                    placeholder="(11) 99999-9999"
+                    onChange={(e) => setClientPhone(maskPhone(e.target.value))}
+                    inputMode="numeric"
+                    maxLength={16}
+                    placeholder="(11) 98834-6626"
                     className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   />

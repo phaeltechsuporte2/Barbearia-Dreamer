@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 
 type Theme = "dark" | "light";
 
@@ -24,7 +16,6 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
@@ -33,18 +24,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme(initial);
       document.documentElement.classList.toggle("dark", initial === "dark");
       document.documentElement.classList.toggle("light", initial === "light");
-    } catch {
-      // localStorage may not be available
-    }
-    setMounted(true);
+    } catch {}
   }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
       const next: Theme = prev === "dark" ? "light" : "dark";
-      try {
-        localStorage.setItem("theme", next);
-      } catch {}
+      try { localStorage.setItem("theme", next); } catch {}
       document.documentElement.classList.toggle("dark", next === "dark");
       document.documentElement.classList.toggle("light", next === "light");
       return next;
@@ -55,9 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      <div style={{ visibility: mounted ? "visible" : "hidden" }}>
-        {children}
-      </div>
+      {children}
     </ThemeContext.Provider>
   );
 }

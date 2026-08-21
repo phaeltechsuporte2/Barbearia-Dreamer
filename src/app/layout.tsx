@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
+import { AuthProvider } from "@/lib/AuthContext";
+import { ThemeProvider } from "@/lib/ThemeProvider";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -37,7 +39,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${outfit.variable} scroll-smooth antialiased`}>
       <body className="min-h-full flex flex-col bg-brand-black text-white">
-        {children}
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

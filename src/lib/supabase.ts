@@ -25,6 +25,7 @@ export interface Appointment {
   id: string;
   client_name: string;
   client_phone: string;
+  client_email?: string;
   service_id: number;
   barber_id: number;
   appointment_date: string;

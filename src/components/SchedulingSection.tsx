@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { createAppointment, getBarbers, getServices } from "@/lib/actions";
 import type { Barber, Service } from "@/lib/supabase";
+import { useAuth } from "@/lib/AuthContext";
+import Link from "next/link";
 
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -13,6 +15,7 @@ const maskPhone = (value: string) => {
 };
 
 export default function SchedulingSection() {
+  const { user, loading: authLoading } = useAuth();
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -29,6 +32,13 @@ export default function SchedulingSection() {
   const [error, setError] = useState("");
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [calendarConnected, setCalendarConnected] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      const meta = user.user_metadata;
+      if (meta?.name && !clientName) setClientName(meta.name);
+    }
+  }, [user]);
 
   useEffect(() => {
     async function loadData() {
@@ -87,6 +97,7 @@ export default function SchedulingSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     if (
       !selectedDate ||
       !selectedTime ||
@@ -109,6 +120,7 @@ export default function SchedulingSection() {
       await createAppointment({
         client_name: clientName,
         client_phone: clientPhone,
+        client_email: user.email || "",
         service_id: selectedServiceId,
         barber_id: selectedBarber,
         appointment_date: selectedDate,
@@ -177,6 +189,45 @@ export default function SchedulingSection() {
     "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
   ];
+
+  if (authLoading) {
+    return (
+      <section id="scheduling" className="py-24 bg-brand-dark relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section id="scheduling" className="py-24 bg-brand-dark relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-orange/5 rounded-full blur-[128px] pointer-events-none" />
+        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <div className="max-w-md mx-auto bg-brand-black rounded-2xl p-8 border border-white/5">
+            <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" x2="3" y1="12" y2="12" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3">Faca Login para Agendar</h3>
+            <p className="text-gray-400 mb-6">Voce precisa estar logado para fazer um agendamento.</p>
+            <div className="flex flex-col gap-3">
+              <Link href="/auth/login" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
+                Entrar
+              </Link>
+              <Link href="/auth/register" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 border border-brand-orange text-brand-orange rounded-full font-semibold hover:bg-brand-orange/10 transition-all">
+                Criar Conta
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

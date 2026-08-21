@@ -16,6 +16,7 @@ type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
 interface Plan {
   id: string;
   client_name: string;
+  client_email: string;
   plan_type: PlanType;
   amount_paid: number;
   start_date: string;
@@ -237,9 +238,11 @@ export default function AdminPage() {
   const [historySearch, setHistorySearch] = useState("");
   const [historyFrom, setHistoryFrom] = useState("");
   const [historyTo, setHistoryTo] = useState("");
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planName, setPlanName] = useState("");
+  const [planEmail, setPlanEmail] = useState("");
   const [planType, setPlanType] = useState<PlanType>("Mensal");
   const [planAmount, setPlanAmount] = useState("");
   const [planStartDate, setPlanStartDate] = useState(getTodayStr());
@@ -290,7 +293,13 @@ export default function AdminPage() {
   function handleAddPlan(e: React.FormEvent) {
     e.preventDefault();
     const amount = parseFloat(planAmount);
-    if (!planName.trim() || !planStartDate || isNaN(amount) || amount <= 0) {
+    if (
+      !planName.trim() ||
+      !planEmail.trim() ||
+      !planStartDate ||
+      isNaN(amount) ||
+      amount <= 0
+    ) {
       setPlanError("Preencha todos os campos corretamente.");
       return;
     }
@@ -301,6 +310,7 @@ export default function AdminPage() {
           ? crypto.randomUUID()
           : `${Date.now()}`,
       client_name: planName.trim(),
+      client_email: planEmail.trim(),
       plan_type: planType,
       amount_paid: amount,
       start_date: planStartDate,
@@ -308,6 +318,7 @@ export default function AdminPage() {
     };
     setPlans((prev) => [newPlan, ...prev]);
     setPlanName("");
+    setPlanEmail("");
     setPlanAmount("");
     setPlanType("Mensal");
     setPlanStartDate(getTodayStr());
@@ -325,6 +336,26 @@ export default function AdminPage() {
     await new Promise((resolve) => setTimeout(resolve, 900));
     setRemindedIds(new Set(expiringPlans.map((p) => p.id)));
     setSendingAll(false);
+  }
+
+  async function sendPlanEmail(plan: Plan & { daysRemaining: number }) {
+    setSendingId(plan.id);
+    try {
+      await fetch("/api/email/reminder", {
+        method: "POST",
+        body: JSON.stringify({
+          clientName: plan.client_name,
+          planName: plan.plan_type,
+          daysRemaining: plan.daysRemaining,
+          expiryDate: plan.end_date,
+        }),
+      });
+      setRemindedIds((prev) => new Set(prev).add(plan.id));
+    } catch (err) {
+      console.error("Erro ao enviar email:", err);
+    } finally {
+      setSendingId(null);
+    }
   }
 
   const today = getTodayStr();
@@ -369,6 +400,26 @@ export default function AdminPage() {
       ).length,
     };
   }, [historyAppointments]);
+
+  const clientHistory = useMemo(() => {
+    if (!selectedClient) return [];
+    return appointments.filter(
+      (apt) => apt.client_name === selectedClient
+    );
+  }, [appointments, selectedClient]);
+
+  const clientStats = useMemo(() => {
+    return {
+      total: clientHistory.length,
+      completed: clientHistory.filter((apt) => apt.status === "concluido")
+        .length,
+      cancelled: clientHistory.filter((apt) => apt.status === "cancelado")
+        .length,
+      totalSpent: clientHistory
+        .filter((apt) => apt.status === "concluido")
+        .reduce((sum, apt) => sum + (apt.services?.price ?? 0), 0),
+    };
+  }, [clientHistory]);
 
   const plansWithMeta = useMemo(() => {
     return plans
@@ -695,6 +746,11 @@ export default function AdminPage() {
                             <div className="font-medium text-white">
                               {apt.client_name}
                             </div>
+                            {apt.client_email && (
+                              <div className="text-xs text-gray-500">
+                                {apt.client_email}
+                              </div>
+                            )}
                             <div className="text-xs text-gray-500 md:hidden">
                               {apt.services?.name}
                             </div>
@@ -770,6 +826,121 @@ export default function AdminPage() {
 
             {tab === "historico" && (
               <div className="space-y-6">
+                {selectedClient ? (
+                  <div className="bg-brand-dark rounded-2xl border border-white/5">
+                    <div className="p-4 md:p-6 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <h3 className="text-xl font-bold text-white truncate">
+                          Historico de {selectedClient}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Todos os agendamentos deste cliente
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedClient(null)}
+                        className="w-full sm:w-auto px-4 py-2 min-h-[44px] bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm font-medium shrink-0"
+                      >
+                        Voltar
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 md:p-6">
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-white">
+                          {clientStats.total}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Total
+                        </div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-green-400">
+                          {clientStats.completed}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Concluidos
+                        </div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-red-400">
+                          {clientStats.cancelled}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Cancelados
+                        </div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-brand-orange break-all">
+                          R$ {clientStats.totalSpent.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Total Gasto
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-white/5">
+                            <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                              Servico
+                            </th>
+                            <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 hidden md:table-cell">
+                              Barbeiro
+                            </th>
+                            <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                              Data
+                            </th>
+                            <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                              Valor
+                            </th>
+                            <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {clientHistory.map((apt) => (
+                            <tr
+                              key={apt.id}
+                              className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                            >
+                              <td className="px-4 md:px-6 py-4 text-gray-400">
+                                {apt.services?.name}
+                              </td>
+                              <td className="px-6 py-4 text-gray-400 hidden md:table-cell">
+                                {apt.barbers?.name}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">
+                                {formatDateBR(apt.appointment_date)}{" "}
+                                {apt.appointment_time?.slice(0, 5)}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 text-brand-orange font-medium whitespace-nowrap">
+                                R$ {apt.services?.price}
+                              </td>
+                              <td className="px-4 md:px-6 py-4">
+                                <StatusBadge status={apt.status} />
+                              </td>
+                            </tr>
+                          ))}
+                          {clientHistory.length === 0 && (
+                            <tr>
+                              <td
+                                colSpan={5}
+                                className="px-6 py-12 text-center text-gray-500"
+                              >
+                                Nenhum agendamento encontrado para este cliente
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                <>
                 <div className="bg-brand-dark rounded-2xl p-4 md:p-6 border border-white/5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
@@ -888,9 +1059,13 @@ export default function AdminPage() {
                             className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
                           >
                             <td className="px-4 md:px-6 py-4">
-                              <div className="font-medium text-white">
+                              <button
+                                onClick={() => setSelectedClient(apt.client_name)}
+                                className="font-medium text-white hover:text-brand-orange transition-colors text-left"
+                                title="Ver historico do cliente"
+                              >
                                 {apt.client_name}
-                              </div>
+                              </button>
                               <div className="text-xs text-gray-500">
                                 {apt.client_phone}
                               </div>
@@ -927,6 +1102,8 @@ export default function AdminPage() {
                     </table>
                   </div>
                 </div>
+                </>
+                )}
               </div>
             )}
 
@@ -937,7 +1114,7 @@ export default function AdminPage() {
                     Adicionar Plano
                   </h3>
                   <form onSubmit={handleAddPlan}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-400 mb-2">
                           Nome do Cliente
@@ -947,6 +1124,18 @@ export default function AdminPage() {
                           value={planName}
                           onChange={(e) => setPlanName(e.target.value)}
                           placeholder="Nome do cliente"
+                          className={fieldClasses}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          Email do Cliente
+                        </label>
+                        <input
+                          type="email"
+                          value={planEmail}
+                          onChange={(e) => setPlanEmail(e.target.value)}
+                          placeholder="email@exemplo.com"
                           className={fieldClasses}
                         />
                       </div>
@@ -1055,14 +1244,36 @@ export default function AdminPage() {
                           <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
                             Status
                           </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500 min-w-[140px]">
+                            Progresso
+                          </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            Acoes
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {plansWithMeta.map((plan) => (
-                          <tr
-                            key={plan.id}
-                            className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
-                          >
+                        {plansWithMeta.map((plan) => {
+                          const totalDays = PLAN_DURATIONS[plan.plan_type];
+                          const elapsed = totalDays - plan.daysRemaining;
+                          const percent = Math.max(
+                            0,
+                            Math.min(100, (elapsed / totalDays) * 100)
+                          );
+                          const remainingPercent = 100 - percent;
+                          const barColor = plan.expired
+                            ? "bg-gray-500"
+                            : remainingPercent > 50
+                              ? "bg-green-500"
+                              : remainingPercent > 20
+                                ? "bg-yellow-500"
+                                : "bg-red-500";
+                          const reminded = remindedIds.has(plan.id);
+                          return (
+                            <tr
+                              key={plan.id}
+                              className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                            >
                             <td className="px-4 md:px-6 py-4 font-medium text-white">
                               {plan.client_name}
                             </td>
@@ -1089,23 +1300,52 @@ export default function AdminPage() {
                             >
                               {Math.max(0, plan.daysRemaining)} dias
                             </td>
-                            <td className="px-4 md:px-6 py-4">
-                              <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
-                                  plan.expired
-                                    ? "bg-red-500/20 text-red-400 border-red-500/30"
-                                    : "bg-green-500/20 text-green-400 border-green-500/30"
-                                }`}
-                              >
-                                {plan.expired ? "Expirada" : "Ativa"}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                              <td className="px-4 md:px-6 py-4">
+                                <span
+                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
+                                    plan.expired
+                                      ? "bg-red-500/20 text-red-400 border-red-500/30"
+                                      : "bg-green-500/20 text-green-400 border-green-500/30"
+                                  }`}
+                                >
+                                  {plan.expired ? "Expirada" : "Ativa"}
+                                </span>
+                              </td>
+                              <td className="px-4 md:px-6 py-4">
+                                <div className="w-full h-2 bg-white/10 rounded-full">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                                    style={{ width: `${percent}%` }}
+                                  />
+                                </div>
+                                <span className="block text-xs text-gray-500 mt-1.5 whitespace-nowrap">
+                                  {Math.max(0, elapsed)} de {totalDays} dias
+                                </span>
+                              </td>
+                              <td className="px-4 md:px-6 py-4">
+                                <button
+                                  onClick={() => sendPlanEmail(plan)}
+                                  disabled={reminded || sendingId === plan.id}
+                                  className={`flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-xl text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
+                                    reminded
+                                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                                      : "bg-brand-orange/10 text-brand-orange border border-brand-orange/30 hover:bg-brand-orange/20"
+                                  } disabled:pointer-events-none`}
+                                >
+                                  {reminded
+                                    ? "Enviado!"
+                                    : sendingId === plan.id
+                                      ? "Enviando..."
+                                      : "Enviar Email"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                         {plansWithMeta.length === 0 && (
                           <tr>
                             <td
-                              colSpan={7}
+                              colSpan={9}
                               className="px-6 py-12 text-center text-gray-500"
                             >
                               Nenhum plano cadastrado ainda

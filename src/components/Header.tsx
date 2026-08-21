@@ -42,8 +42,8 @@ export default function Header() {
 
   const headerBg = scrolled
     ? isDark
-      ? "bg-brand-black/90 backdrop-blur-md py-3 shadow-lg shadow-brand-orange/5"
-      : "bg-white/90 backdrop-blur-md py-3 shadow-lg shadow-black/5"
+      ? "bg-brand-black/90 py-3 shadow-lg shadow-brand-orange/5"
+      : "bg-white/90 py-3 shadow-lg shadow-black/5"
     : "bg-transparent py-6";
 
   const navLinkColor = isDark
@@ -197,7 +197,7 @@ export default function Header() {
 
       {menuOpen && (
         <div
-          className={`md:hidden backdrop-blur-md border-t mt-2 ${
+          className={`md:hidden border-t mt-2 ${
             isDark ? "bg-brand-dark/95 border-white/5" : "bg-white/95 border-gray-200"
           }`}
         >

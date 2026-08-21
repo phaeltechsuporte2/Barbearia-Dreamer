@@ -3,7 +3,7 @@ export default function AboutSection() {
     <section id="about" className="py-24 bg-brand-dark relative overflow-hidden">
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-16">
-          <div className="w-full md:w-1/2 flex justify-center animate-fade-in-left opacity-0">
+          <div className="w-full md:w-1/2 flex justify-center animate-fade-in-left">
             <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full border-4 border-brand-orange/30 shadow-[0_0_40px_rgba(249,115,22,0.2)] overflow-hidden">
               <img
                 src="/images/logo.jpg"
@@ -13,7 +13,7 @@ export default function AboutSection() {
             </div>
           </div>
 
-          <div className="w-full md:w-1/2 animate-fade-in-right opacity-0">
+          <div className="w-full md:w-1/2 animate-fade-in-right">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Bem-vindo a{" "}
               <span className="text-brand-orange">Barbearia Dreamer</span>

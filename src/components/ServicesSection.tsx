@@ -102,11 +102,11 @@ export default function ServicesSection() {
     <section id="services" className="py-24 bg-brand-black">
       <div className="container mx-auto px-6 md:px-12">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up opacity-0">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up">
             Nossos{" "}
             <span className="text-brand-orange">Servicos</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-100 opacity-0">
+          <p className="text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-100">
             Oferecemos uma linha completa de servicos para cuidar do seu visual
             com qualidade e estilo.
           </p>
@@ -116,7 +116,7 @@ export default function ServicesSection() {
           {services.map((service, index) => (
             <div
               key={service.name}
-              className={`bg-brand-dark rounded-2xl p-6 border border-white/5 hover:border-brand-orange/40 shadow-lg hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] transition-all group cursor-pointer flex flex-col items-start h-full animate-fade-in-up opacity-0 delay-${(index + 2) * 100}`}
+              className={`bg-brand-dark rounded-2xl p-6 border border-white/5 hover:border-brand-orange/40 shadow-lg hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] transition-all group cursor-pointer flex flex-col items-start h-full animate-fade-in-up delay-${(index + 2) * 100}`}
             >
               <div className="w-12 h-12 bg-white/5 group-hover:bg-brand-orange/10 rounded-xl flex items-center justify-center mb-6 transition-colors">
                 <span className="text-brand-orange group-hover:text-brand-orange-light transition-colors">

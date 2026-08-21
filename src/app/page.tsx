@@ -1,12 +1,10 @@
-import dynamic from "next/dynamic";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
-
-const AboutSection = dynamic(() => import("@/components/AboutSection"), { loading: () => null });
-const ServicesSection = dynamic(() => import("@/components/ServicesSection"), { loading: () => null });
-const PlansSection = dynamic(() => import("@/components/PlansSection"), { loading: () => null });
-const SchedulingSection = dynamic(() => import("@/components/SchedulingSection"), { loading: () => null });
+import AboutSection from "@/components/AboutSection";
+import ServicesSection from "@/components/ServicesSection";
+import PlansSection from "@/components/PlansSection";
+import SchedulingSection from "@/components/SchedulingSection";
 
 export default function Home() {
   return (

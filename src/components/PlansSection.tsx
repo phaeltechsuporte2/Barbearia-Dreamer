@@ -103,7 +103,12 @@ export default function PlansSection() {
 
   return (
     <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-orange/5 rounded-full blur-[150px] pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 500px 500px at 50% 50%, rgba(249,115,22,0.05), transparent)",
+        }}
+      />
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="text-center mb-12">

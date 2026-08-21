@@ -8,6 +8,7 @@ const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -38,6 +39,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${outfit.variable} scroll-smooth antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-full flex flex-col bg-brand-black text-white">
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>

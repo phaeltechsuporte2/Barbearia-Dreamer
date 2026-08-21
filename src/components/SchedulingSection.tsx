@@ -400,9 +400,6 @@ export default function SchedulingSection() {
                         <div className="text-white font-medium text-sm">
                           {barber.name}
                         </div>
-                        <div className="text-xs mt-1 opacity-70">
-                          {barber.specialty.split(" ")[0]}
-                        </div>
                       </button>
                     ))}
                   </div>

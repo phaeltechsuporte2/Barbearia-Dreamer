@@ -8,7 +8,7 @@ import SchedulingSection from "@/components/SchedulingSection";
 
 export default function Home() {
   return (
-    <main className="flex flex-col min-h-screen bg-brand-black w-full overflow-hidden">
+    <main className="flex flex-col min-h-screen bg-brand-black w-full">
       <Header />
       <HeroSection />
       <AboutSection />

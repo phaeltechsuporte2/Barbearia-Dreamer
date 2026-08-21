@@ -149,6 +149,23 @@ input:focus, select:focus, textarea:focus {
   animation: slideUp 0.3s ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-pulse-glow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .blur-\[128px\] {
+    filter: blur(60px) !important;
+  }
+}
+
 /* Light theme */
 html.light {
   color-scheme: light;

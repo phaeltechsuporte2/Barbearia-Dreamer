@@ -1,13 +1,11 @@
-"use client";
-
 export default function HeroSection() {
   return (
     <section
       id="home"
       className="relative min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden bg-brand-black"
     >
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-orange/15 rounded-full blur-[128px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-[128px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-orange/15 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-[80px] pointer-events-none" />
 
       <div className="container mx-auto px-6 md:px-12 relative z-10 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-brand-orange mb-8 animate-fade-in-up opacity-0">

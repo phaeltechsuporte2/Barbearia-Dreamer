@@ -251,13 +251,14 @@ export default function PlansSection() {
             desconto!
           </p>
 
-          <div className="inline-flex items-center bg-brand-dark rounded-full p-1 border border-[var(--border-main)]">
+          <div className="mx-auto w-full max-w-sm md:w-fit grid grid-cols-2 md:flex md:items-center gap-1 bg-brand-dark rounded-2xl md:rounded-full p-1.5 border border-[var(--border-main)]">
             {(["mensal", "trimestral", "semestral", "anual"] as Period[]).map(
               (p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                  aria-pressed={period === p}
+                  className={`min-h-[46px] px-4 py-2 rounded-xl md:rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
                     period === p
                       ? "bg-brand-orange text-brand-black shadow-lg"
                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -266,9 +267,9 @@ export default function PlansSection() {
                   {periodLabels[p]}
                   {p !== "mensal" && (
                     <span
-                      className={`absolute -top-2 -right-2 text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                         period === p
-                          ? "bg-brand-black text-brand-orange"
+                          ? "bg-brand-black/20 text-brand-black"
                           : "bg-brand-orange/20 text-brand-orange"
                       }`}
                     >
@@ -281,7 +282,7 @@ export default function PlansSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7 lg:gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const total = getPrice(plan.monthlyPrice, period);
             const perMonth = getPerMonth(plan.monthlyPrice, period);
@@ -293,144 +294,142 @@ export default function PlansSection() {
                   : period === "semestral"
                     ? 6
                     : 12;
+            const accentText =
+              plan.color === "orange"
+                ? "text-brand-orange"
+                : plan.color === "gold"
+                  ? "text-brand-gold"
+                  : "text-[var(--text-primary)]";
 
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-3xl p-8 transition-all ${
+                className={`relative rounded-3xl overflow-hidden flex flex-col bg-brand-dark transition-all ${
                   plan.popular
-                    ? "bg-brand-dark border-2 border-brand-orange shadow-[0_0_40px_rgba(249,115,22,0.15)] scale-105"
-                    : "bg-brand-dark border border-[var(--border-main)] hover:border-[var(--border-main)]"
+                    ? "border-2 border-brand-orange shadow-[0_0_40px_rgba(249,115,22,0.15)] md:scale-[1.03]"
+                    : "border border-[var(--border-main)] hover:border-[var(--bg-subtle-hover)]"
                 }`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-brand-orange text-brand-black text-xs font-bold rounded-full">
-                    MAIS POPULAR
-                  </div>
-                )}
-
-                <div className="text-center mb-8">
-                  <h3
-                    className={`text-2xl font-bold mb-2 ${
-                      plan.color === "orange"
-                        ? "text-brand-orange"
-                        : plan.color === "gold"
-                          ? "text-brand-gold"
-                          : "text-[var(--text-primary)]"
-                    }`}
-                  >
-                    {plan.name}
-                  </h3>
-                  <p className="text-[var(--text-muted)] text-sm">{plan.description}</p>
-                </div>
-
-                <div className="text-center mb-8">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-[var(--text-muted)] text-lg">R$</span>
-                    <span
-                      className={`text-5xl font-bold ${
-                        plan.color === "orange"
-                          ? "text-brand-orange"
-                          : plan.color === "gold"
-                            ? "text-brand-gold"
-                            : "text-[var(--text-primary)]"
-                      }`}
-                    >
-                      {perMonth.toFixed(0).replace(".", ",")}
-                    </span>
-                    <span className="text-[var(--text-muted)]">,90</span>
-                  </div>
-                  <p className="text-[var(--text-muted)] text-sm mt-1">
-                    por mes{period !== "mensal" && ` (${months}x)`}
-                  </p>
-                  {period !== "mensal" && (
-                    <div className="mt-2">
-                      <span className="text-[var(--text-muted)] text-xs line-through">
-                        R${" "}
-                        {(plan.monthlyPrice * months)
-                          .toFixed(2)
-                          .replace(".", ",")}
-                      </span>
-                      <span className="text-green-400 text-xs ml-2 font-medium">
-                        Economize R${" "}
-                        {(
-                          plan.monthlyPrice * months -
-                          total
-                        )
-                          .toFixed(2)
-                          .replace(".", ",")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature.text}
-                      className="flex items-center gap-3"
-                    >
-                      {feature.included ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={
-                            plan.color === "orange"
-                              ? "#F97316"
-                              : plan.color === "gold"
-                                ? "#F59E0B"
-                                : "#22C55E"
-                          }
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="shrink-0"
-                        >
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#4B5563"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="shrink-0"
-                        >
-                          <path d="M18 6 6 18" />
-                          <path d="m6 6 12 12" />
-                        </svg>
-                      )}
-                      <span
-                        className={`text-sm ${
-                          feature.included ? "text-[var(--text-secondary)]" : "text-[var(--text-muted)]"
-                        }`}
-                      >
-                        {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => setSelectedPlan(plan.name)}
-                  className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
+                <div
+                  className={`px-6 pt-6 pb-5 text-center ${
                     plan.popular
-                      ? "bg-brand-orange text-brand-black hover:bg-brand-orange-light shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+                      ? "bg-gradient-to-b from-brand-orange/25 to-transparent border-b border-brand-orange/30"
                       : plan.color === "gold"
-                        ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/30 hover:bg-brand-gold/20"
-                        : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-main)] hover:bg-[var(--bg-subtle-hover)]"
+                        ? "bg-gradient-to-b from-brand-gold/20 to-transparent border-b border-brand-gold/25"
+                        : "bg-[var(--bg-subtle)] border-b border-[var(--border-main)]"
                   }`}
                 >
-                  Assinar {plan.name}
-                </button>
+                  {plan.popular && (
+                    <span className="inline-block mb-2 px-3 py-1 bg-brand-orange text-brand-black text-[11px] font-bold uppercase tracking-wide rounded-full">
+                      Mais popular
+                    </span>
+                  )}
+                  <h3 className={`text-xl sm:text-2xl font-bold ${accentText}`}>
+                    {plan.name}
+                  </h3>
+                  <p className="text-[var(--text-muted)] text-sm mt-1">
+                    {plan.description}
+                  </p>
+                </div>
+
+                <div className="flex flex-col flex-1 p-6 sm:p-8">
+                  <div className="text-center pb-5 mb-5 border-b border-[var(--border-subtle)]">
+                    <div className="flex items-baseline justify-center gap-1.5">
+                      <span className="text-[var(--text-muted)] text-base">R$</span>
+                      <span className={`text-4xl font-bold ${accentText}`}>
+                        {perMonth.toFixed(2).replace(".", ",")}
+                      </span>
+                    </div>
+                    <p className="text-[var(--text-muted)] text-sm mt-1">
+                      por mês
+                      {period !== "mensal" &&
+                        ` · total R$ ${total.toFixed(2).replace(".", ",")}`}
+                    </p>
+                    {period !== "mensal" && (
+                      <p className="mt-2 text-xs">
+                        <span className="text-[var(--text-muted)] line-through">
+                          R${" "}
+                          {(plan.monthlyPrice * months)
+                            .toFixed(2)
+                            .replace(".", ",")}
+                        </span>
+                        <span className="text-green-400 ml-2 font-medium">
+                          Economize R${" "}
+                          {(plan.monthlyPrice * months - total)
+                            .toFixed(2)
+                            .replace(".", ",")}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+
+                  <ul className="space-y-3 mb-6">
+                    {plan.features.map((feature) => (
+                      <li key={feature.text} className="flex items-center gap-3">
+                        {feature.included ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke={
+                              plan.color === "orange"
+                                ? "#F97316"
+                                : plan.color === "gold"
+                                  ? "#F59E0B"
+                                  : "#22C55E"
+                            }
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="shrink-0"
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#4B5563"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="shrink-0"
+                          >
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                          </svg>
+                        )}
+                        <span
+                          className={`text-sm leading-snug ${
+                            feature.included
+                              ? "text-[var(--text-secondary)]"
+                              : "text-[var(--text-muted)]"
+                          }`}
+                        >
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => setSelectedPlan(plan.name)}
+                    className={`mt-auto w-full min-h-[48px] py-3 rounded-full font-bold text-base transition-all active:scale-[0.98] ${
+                      plan.popular
+                        ? "bg-brand-orange text-brand-black hover:bg-brand-orange-light shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+                        : plan.color === "gold"
+                          ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/30 hover:bg-brand-gold/20"
+                          : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-main)] hover:bg-[var(--bg-subtle-hover)]"
+                    }`}
+                  >
+                    Assinar {plan.name}
+                  </button>
+                </div>
               </div>
             );
           })}

@@ -24,14 +24,16 @@ export async function POST(request: NextRequest) {
 
     const htmlContent = `
       <!DOCTYPE html>
-      <html>
+      <html lang="pt-BR">
       <head>
         <meta charset="utf-8">
+        <meta name="color-scheme" content="dark">
+        <meta name="supported-color-schemes" content="dark">
       </head>
-      <body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,sans-serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 20px;">
+      <body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,sans-serif;" bgcolor="#0a0a0a">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0a0a0a" style="background-color:#0a0a0a;padding:40px 20px;">
           <tr>
-            <td align="center">
+            <td align="center" bgcolor="#0a0a0a">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color:#111111;border-radius:16px;border:1px solid rgba(249,115,22,0.2);overflow:hidden;">
                 <tr>
                   <td style="background: linear-gradient(135deg, #F97316, #F59E0B); padding:30px; text-align:center;">

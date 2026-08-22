@@ -9,10 +9,14 @@ import {
   updateAppointmentStatus,
   getPlans,
   createPlan as createPlanAction,
+  getClients,
+  createClientAction,
+  deleteClient,
+  getPlanCatalog,
 } from "@/lib/actions";
-import type { Appointment, Plan } from "@/lib/supabase";
+import type { Appointment, Plan, Client, PlanCatalog } from "@/lib/supabase";
 
-type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes";
+type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes" | "clientes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
 
 const PLAN_DURATIONS: Record<PlanType, number> = {
@@ -190,6 +194,18 @@ const NAV_ITEMS: { id: Tab; label: string; icon: ReactNode }[] = [
       </>
     ),
   },
+  {
+    id: "clientes",
+    label: "Clientes",
+    icon: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+  },
 ];
 
 const TAB_TITLES: Record<Tab, { title: string; subtitle: string }> = {
@@ -206,6 +222,10 @@ const TAB_TITLES: Record<Tab, { title: string; subtitle: string }> = {
   lembretes: {
     title: "Lembretes",
     subtitle: "Planos proximos do vencimento",
+  },
+  clientes: {
+    title: "Clientes",
+    subtitle: "Gerencie seus clientes",
   },
 };
 
@@ -248,16 +268,31 @@ export default function AdminPage() {
 
   const [previewPlan, setPreviewPlan] = useState<(Plan & { daysRemaining: number }) | null>(null);
 
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clientNameNew, setClientNameNew] = useState("");
+  const [clientEmailNew, setClientEmailNew] = useState("");
+  const [clientPhoneNew, setClientPhoneNew] = useState("");
+  const [clientError, setClientError] = useState("");
+
+  const [planCatalog, setPlanCatalog] = useState<PlanCatalog[]>([]);
+
+  const [previewReminder, setPreviewReminder] = useState<(Plan & { daysRemaining: number }) | null>(null);
+
   async function loadData() {
     try {
-      const [appointmentsData, statsData, plansData] = await Promise.all([
+      const [appointmentsData, statsData, plansData, clientsData, catalogData] = await Promise.all([
         getAppointments(),
         getRevenueStats(),
         getPlans(),
+        getClients(),
+        getPlanCatalog(),
       ]);
       setAppointments(appointmentsData);
       setStats(statsData);
       setPlans(plansData);
+      setClients(clientsData);
+      setPlanCatalog(catalogData);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
     } finally {
@@ -279,6 +314,15 @@ export default function AdminPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const match = planCatalog.find(
+      (c) => c.plan_name === planPlanName && c.period === planType
+    );
+    if (match) {
+      setPlanAmount(String(match.price));
+    }
+  }, [planPlanName, planType, planCatalog]);
 
   async function handleStatusChange(
     id: string,
@@ -338,17 +382,53 @@ export default function AdminPage() {
     }
   }
 
-  async function sendReminder(id: string) {
-    setSendingId(id);
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    setRemindedIds((prev) => new Set(prev).add(id));
-    setSendingId(null);
+  async function sendReminder(plan: Plan & { daysRemaining: number }) {
+    setPreviewReminder(plan);
+  }
+
+  async function confirmSendReminder() {
+    if (!previewReminder) return;
+    setSendingId(previewReminder.id);
+    try {
+      await fetch("/api/email/reminder", {
+        method: "POST",
+        body: JSON.stringify({
+          clientName: previewReminder.client_name,
+          clientEmail: previewReminder.client_email,
+          planName: previewReminder.plan_name || previewReminder.plan_type,
+          daysRemaining: previewReminder.daysRemaining,
+          expiryDate: previewReminder.end_date,
+        }),
+      });
+      setRemindedIds((prev) => new Set(prev).add(previewReminder.id));
+    } catch (err) {
+      console.error("Erro ao enviar lembrete:", err);
+    } finally {
+      setSendingId(null);
+      setPreviewReminder(null);
+    }
   }
 
   async function sendAllReminders() {
     setSendingAll(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setRemindedIds(new Set(expiringPlans.map((p) => p.id)));
+    for (const plan of expiringPlans) {
+      if (remindedIds.has(plan.id)) continue;
+      try {
+        await fetch("/api/email/reminder", {
+          method: "POST",
+          body: JSON.stringify({
+            clientName: plan.client_name,
+            clientEmail: plan.client_email,
+            planName: plan.plan_name || plan.plan_type,
+            daysRemaining: plan.daysRemaining,
+            expiryDate: plan.end_date,
+          }),
+        });
+        setRemindedIds((prev) => new Set(prev).add(plan.id));
+      } catch (err) {
+        console.error("Erro ao enviar lembrete:", err);
+      }
+    }
     setSendingAll(false);
   }
 
@@ -374,6 +454,49 @@ export default function AdminPage() {
       setPreviewPlan(null);
     }
   }
+
+  async function handleAddClient(e: React.FormEvent) {
+    e.preventDefault();
+    if (!clientNameNew.trim()) {
+      setClientError("Nome e obrigatorio.");
+      return;
+    }
+    setClientError("");
+    try {
+      const newClient = await createClientAction({
+        name: clientNameNew.trim(),
+        email: clientEmailNew.trim() || undefined,
+        phone: clientPhoneNew.trim() || undefined,
+      });
+      setClients((prev) => [...prev, newClient].sort((a, b) => a.name.localeCompare(b.name)));
+      setClientNameNew("");
+      setClientEmailNew("");
+      setClientPhoneNew("");
+    } catch (err) {
+      console.error("Erro ao criar cliente:", err);
+      setClientError("Erro ao criar cliente. Tente novamente.");
+    }
+  }
+
+  async function handleDeleteClient(id: string) {
+    try {
+      await deleteClient(id);
+      setClients((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error("Erro ao deletar cliente:", err);
+    }
+  }
+
+  const filteredClients = useMemo(() => {
+    if (!clientSearch.trim()) return clients;
+    const s = clientSearch.trim().toLowerCase();
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(s) ||
+        (c.email && c.email.toLowerCase().includes(s)) ||
+        (c.phone && c.phone.includes(s))
+    );
+  }, [clients, clientSearch]);
 
   const today = getTodayStr();
 
@@ -1493,7 +1616,7 @@ export default function AdminPage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => sendReminder(plan.id)}
+                          onClick={() => sendReminder(plan)}
                           disabled={reminded || sendingId === plan.id}
                           className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] rounded-xl text-sm font-semibold transition-colors shrink-0 ${
                             reminded
@@ -1528,6 +1651,163 @@ export default function AdminPage() {
                       Nenhum plano vencendo nos proximos 7 dias
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {tab === "clientes" && (
+              <div className="space-y-6">
+                <div className="bg-brand-dark rounded-2xl p-4 md:p-6 border border-white/5">
+                  <h3 className="text-lg font-bold text-white mb-6">
+                    Adicionar Cliente
+                  </h3>
+                  <form onSubmit={handleAddClient}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          Nome *
+                        </label>
+                        <input
+                          type="text"
+                          value={clientNameNew}
+                          onChange={(e) => setClientNameNew(e.target.value)}
+                          placeholder="Nome do cliente"
+                          className={fieldClasses}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={clientEmailNew}
+                          onChange={(e) => setClientEmailNew(e.target.value)}
+                          placeholder="email@exemplo.com"
+                          className={fieldClasses}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          value={clientPhoneNew}
+                          onChange={(e) => setClientPhoneNew(e.target.value)}
+                          placeholder="(11) 98834-6626"
+                          className={fieldClasses}
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <button
+                          type="submit"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-brand-orange text-brand-black rounded-xl font-semibold hover:bg-brand-orange-dark transition-colors"
+                        >
+                          <Icon size={18}>
+                            <path d="M5 12h14" />
+                            <path d="M12 5v14" />
+                          </Icon>
+                          Adicionar
+                        </button>
+                      </div>
+                    </div>
+                    {clientError && (
+                      <p className="mt-4 text-sm text-red-400">{clientError}</p>
+                    )}
+                  </form>
+                </div>
+
+                <div className="bg-brand-dark rounded-2xl border border-white/5">
+                  <div className="p-4 md:p-6 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <h3 className="text-xl font-bold text-white">
+                      Clientes Cadastrados
+                    </h3>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="text"
+                        value={clientSearch}
+                        onChange={(e) => setClientSearch(e.target.value)}
+                        placeholder="Buscar por nome, email ou telefone..."
+                        className={`${fieldClasses} pr-10`}
+                      />
+                      <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                        <Icon size={16}>
+                          <circle cx="11" cy="11" r="8" />
+                          <path d="m21 21-4.3-4.3" />
+                        </Icon>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-white/5">
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            Nome
+                          </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            Email
+                          </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            WhatsApp
+                          </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            Cadastro
+                          </th>
+                          <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-500">
+                            Acoes
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredClients.map((client) => (
+                          <tr
+                            key={client.id}
+                            className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                          >
+                            <td className="px-4 md:px-6 py-4 font-medium text-white">
+                              {client.name}
+                            </td>
+                            <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">
+                              {client.email || "—"}
+                            </td>
+                            <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">
+                              {client.phone || "—"}
+                            </td>
+                            <td className="px-4 md:px-6 py-4 text-gray-500 whitespace-nowrap">
+                              {formatDateBR(client.created_at.split("T")[0])}
+                            </td>
+                            <td className="px-4 md:px-6 py-4">
+                              <button
+                                onClick={() => handleDeleteClient(client.id)}
+                                className="flex items-center justify-center gap-1 px-3 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                              >
+                                <Icon size={14}>
+                                  <path d="M3 6h18" />
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </Icon>
+                                Remover
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredClients.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-6 py-12 text-center text-gray-500"
+                            >
+                              {clients.length === 0
+                                ? "Nenhum cliente cadastrado ainda"
+                                : "Nenhum cliente encontrado"}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -1595,6 +1875,67 @@ export default function AdminPage() {
                 className="flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-brand-orange text-brand-black rounded-xl font-semibold hover:bg-brand-orange-dark transition-colors disabled:opacity-50"
               >
                 {sendingId === previewPlan.id ? "Enviando..." : "Confirmar Envio"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewReminder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setPreviewReminder(null)}>
+          <div className="bg-brand-dark rounded-2xl p-6 md:p-8 border border-white/10 max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Previa do Lembrete</h3>
+              <button onClick={() => setPreviewReminder(null)} className="text-gray-400 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <Icon size={20}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>
+              </button>
+            </div>
+
+            <div className="rounded-xl overflow-hidden border border-white/10 mb-6">
+              <div style={{background:"linear-gradient(135deg,#F97316,#F59E0B)",padding:"24px",textAlign:"center"}}>
+                <h1 style={{color:"#0a0a0a",margin:0,fontSize:"20px",fontWeight:800}}>Barbearia Dreamer</h1>
+                <p style={{color:"#0a0a0a",margin:"4px 0 0",opacity:0.8,fontSize:"13px"}}>Seu Estilo, Nossa Arte</p>
+              </div>
+              <div style={{background:"#111111",padding:"24px"}}>
+                <div style={{textAlign:"center",marginBottom:"20px"}}>
+                  <div style={{width:"48px",height:"48px",background:"rgba(249,115,22,0.2)",borderRadius:"50%",margin:"0 auto 12px"}}>
+                    <span style={{color:"#F97316",fontSize:"22px",lineHeight:"48px"}}>&#9888;</span>
+                  </div>
+                  <h2 style={{color:"#ffffff",margin:0,fontSize:"18px"}}>Seu plano esta acabando!</h2>
+                  <p style={{color:"#9CA3AF",margin:"6px 0 0",fontSize:"13px"}}>Nao deixe seu estilo para tras</p>
+                </div>
+                <p style={{color:"#D1D5DB",fontSize:"13px",lineHeight:"20px",textAlign:"center",margin:"0 0 20px"}}>
+                  Ola <strong style={{color:"#ffffff"}}>{previewReminder.client_name}</strong>, seu plano
+                  <strong style={{color:"#F97316"}}> {previewReminder.plan_name || previewReminder.plan_type}</strong> termina em
+                  <strong style={{color:"#F97316"}}> {Math.max(0, previewReminder.daysRemaining)} dias</strong> ({formatDateBR(previewReminder.end_date)}).
+                  Nao se esqueca de renovar!
+                </p>
+                <div style={{background:"#0a0a0a",borderRadius:"10px",border:"1px solid rgba(255,255,255,0.05)",padding:"16px",marginBottom:"20px"}}>
+                  <table style={{width:"100%"}}>
+                    <tbody>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Cliente</td><td style={{padding:"6px 0",color:"#ffffff",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{previewReminder.client_name}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Plano</td><td style={{padding:"6px 0",color:"#F97316",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{previewReminder.plan_name || previewReminder.plan_type}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Dias restantes</td><td style={{padding:"6px 0",color:"#F97316",fontSize:"14px",fontWeight:700,textAlign:"right"}}>{Math.max(0, previewReminder.daysRemaining)}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Envio para</td><td style={{padding:"6px 0",color:"#ffffff",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{previewReminder.client_email}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setPreviewReminder(null)} className="flex-1 min-h-[44px] px-4 py-3 bg-white/5 text-gray-300 rounded-xl hover:bg-white/10 transition-colors font-medium">
+                Cancelar
+              </button>
+              <button
+                onClick={confirmSendReminder}
+                disabled={sendingId === previewReminder.id}
+                className="flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-brand-orange text-brand-black rounded-xl font-semibold hover:bg-brand-orange-dark transition-colors disabled:opacity-50"
+              >
+                {sendingId === previewReminder.id ? "Enviando..." : "Confirmar Envio"}
               </button>
             </div>
           </div>

@@ -48,3 +48,18 @@ export interface Appointment {
   services?: Service;
   barbers?: Barber;
 }
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  created_at: string;
+}
+
+export interface PlanCatalog {
+  id: string;
+  plan_name: string;
+  period: string;
+  price: number;
+}

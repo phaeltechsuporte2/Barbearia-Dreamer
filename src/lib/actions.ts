@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase, type Appointment, type Plan } from "@/lib/supabase";
+import { supabase, type Appointment, type Plan, type Client, type PlanCatalog } from "@/lib/supabase";
 
 export async function getAppointments(filters?: {
   date?: string;
@@ -160,4 +160,63 @@ export async function createPlan(plan: {
 export async function deletePlan(id: string) {
   const { error } = await supabase.from("plans").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function getClients(search?: string) {
+  try {
+    let query = supabase
+      .from("clients")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (search) {
+      const s = `%${search}%`;
+      query = query.or("name.ilike." + s + ",email.ilike." + s + ",phone.ilike." + s);
+    }
+
+    const { data, error } = await query;
+    if (error) return [];
+    return (data ?? []) as Client[];
+  } catch {
+    return [];
+  }
+}
+
+export async function createClientAction(data: {
+  name: string;
+  email?: string;
+  phone?: string;
+}) {
+  const { data: result, error } = await supabase
+    .from("clients")
+    .insert({
+      name: data.name,
+      email: data.email || null,
+      phone: data.phone || null,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return result as Client;
+}
+
+export async function deleteClient(id: string) {
+  const { error } = await supabase.from("clients").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function getPlanCatalog() {
+  try {
+    const { data, error } = await supabase
+      .from("plan_catalog")
+      .select("*")
+      .order("plan_name")
+      .order("period");
+
+    if (error) return [];
+    return (data ?? []) as PlanCatalog[];
+  } catch {
+    return [];
+  }
 }

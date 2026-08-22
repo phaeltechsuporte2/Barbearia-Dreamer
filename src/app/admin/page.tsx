@@ -296,6 +296,15 @@ export default function AdminPage() {
 
   const [previewReminder, setPreviewReminder] = useState<(Plan & { daysRemaining: number }) | null>(null);
 
+  const [sendStatus, setSendStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!sendStatus) return;
+    const t = setTimeout(() => setSendStatus(null), 7000);
+    return () => clearTimeout(t);
+  }, [sendStatus]);
+
   const [allReviews, setAllReviews] = useState<Review[]>([]);
 
   async function loadData() {
@@ -404,15 +413,18 @@ export default function AdminPage() {
   }
 
   async function sendReminder(plan: Plan & { daysRemaining: number }) {
+    setSendError(null);
     setPreviewReminder(plan);
   }
 
   async function confirmSendReminder() {
     if (!previewReminder) return;
     setSendingId(previewReminder.id);
+    setSendError(null);
     try {
-      await fetch("/api/email/reminder", {
+      const res = await fetch("/api/email/reminder", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName: previewReminder.client_name,
           clientEmail: previewReminder.client_email,
@@ -421,22 +433,34 @@ export default function AdminPage() {
           expiryDate: previewReminder.end_date,
         }),
       });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
       setRemindedIds((prev) => new Set(prev).add(previewReminder.id));
+      setSendStatus({
+        ok: true,
+        msg: `E-mail enviado com sucesso para ${previewReminder.client_email}`,
+      });
+      setPreviewReminder(null);
     } catch (err) {
       console.error("Erro ao enviar lembrete:", err);
+      setSendError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setSendingId(null);
-      setPreviewReminder(null);
     }
   }
 
   async function sendAllReminders() {
     setSendingAll(true);
+    let okCount = 0;
+    const failures: string[] = [];
     for (const plan of expiringPlans) {
       if (remindedIds.has(plan.id)) continue;
       try {
-        await fetch("/api/email/reminder", {
+        const res = await fetch("/api/email/reminder", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             clientName: plan.client_name,
             clientEmail: plan.client_email,
@@ -445,20 +469,38 @@ export default function AdminPage() {
             expiryDate: plan.end_date,
           }),
         });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.error || `HTTP ${res.status}`);
+        }
         setRemindedIds((prev) => new Set(prev).add(plan.id));
+        okCount++;
       } catch (err) {
         console.error("Erro ao enviar lembrete:", err);
+        failures.push(
+          `${plan.client_name}: ${err instanceof Error ? err.message : "erro"}`
+        );
       }
     }
     setSendingAll(false);
+    if (failures.length > 0) {
+      setSendStatus({
+        ok: false,
+        msg: `${okCount} enviado(s), ${failures.length} falharam — ${failures[0]}${failures.length > 1 ? " ..." : ""}`,
+      });
+    } else if (okCount > 0) {
+      setSendStatus({ ok: true, msg: `${okCount} lembrete(s) enviado(s) com sucesso!` });
+    }
   }
 
   async function confirmSendPlanEmail() {
     if (!previewPlan) return;
     setSendingId(previewPlan.id);
+    setSendError(null);
     try {
-      await fetch("/api/email/reminder", {
+      const res = await fetch("/api/email/reminder", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName: previewPlan.client_name,
           clientEmail: previewPlan.client_email,
@@ -467,12 +509,21 @@ export default function AdminPage() {
           expiryDate: previewPlan.end_date,
         }),
       });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
       setRemindedIds((prev) => new Set(prev).add(previewPlan.id));
+      setSendStatus({
+        ok: true,
+        msg: `E-mail enviado com sucesso para ${previewPlan.client_email}`,
+      });
+      setPreviewPlan(null);
     } catch (err) {
       console.error("Erro ao enviar email:", err);
+      setSendError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setSendingId(null);
-      setPreviewPlan(null);
     }
   }
 
@@ -1551,7 +1602,10 @@ export default function AdminPage() {
                               </td>
                               <td className="px-4 md:px-6 py-4">
                                 <button
-                                  onClick={() => setPreviewPlan(plan)}
+                                  onClick={() => {
+                                    setSendError(null);
+                                    setPreviewPlan(plan);
+                                  }}
                                   disabled={reminded || sendingId === plan.id}
                                   className={`flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-xl text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
                                     reminded
@@ -2016,6 +2070,11 @@ export default function AdminPage() {
                 {sendingId === previewPlan.id ? "Enviando..." : "Confirmar Envio"}
               </button>
             </div>
+            {sendError && (
+              <p className="mt-3 text-center text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2">
+                Falha ao enviar: {sendError}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -2077,7 +2136,24 @@ export default function AdminPage() {
                 {sendingId === previewReminder.id ? "Enviando..." : "Confirmar Envio"}
               </button>
             </div>
+            {sendError && (
+              <p className="mt-3 text-center text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2">
+                Falha ao enviar: {sendError}
+              </p>
+            )}
           </div>
+        </div>
+      )}
+
+      {sendStatus && (
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-[90vw] px-5 py-3 rounded-xl border text-sm font-medium shadow-lg ${
+            sendStatus.ok
+              ? "bg-green-500/15 text-green-400 border-green-500/30"
+              : "bg-red-500/15 text-red-400 border-red-500/30"
+          }`}
+        >
+          {sendStatus.msg}
         </div>
       )}
     </div>

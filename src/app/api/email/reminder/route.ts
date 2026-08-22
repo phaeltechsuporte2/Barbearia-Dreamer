@@ -114,9 +114,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error sending reminder email:", error);
-    return NextResponse.json(
-      { error: "Failed to send reminder email" },
-      { status: 500 }
-    );
+    const msg =
+      error instanceof Error ? error.message : "Failed to send reminder email";
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

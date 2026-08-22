@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
                 <tr>
                   <td style="background: linear-gradient(135deg, #F97316, #F59E0B); padding:30px; text-align:center;">
                     <img
-                      src="https://barbearia-dreamer-gules.vercel.app/images/logo.jpg"
+                      src="https://barbearia-dreamer-gules.vercel.app/images/logo-email.jpg"
                       alt="Logo Barbearia Dreamer"
                       width="100"
                       style="display:block;margin:0 auto 14px;width:100px;height:auto;border-radius:12px;border:3px solid rgba(10,10,10,0.85);"

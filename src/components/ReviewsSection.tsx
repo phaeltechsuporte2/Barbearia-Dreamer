@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { createClient } from "@/lib/supabase-browser";
 import type { Review } from "@/lib/supabase";
-import { createReview } from "@/lib/actions";
+import { createReview, getApprovedReviews } from "@/lib/actions";
 
 function StarRating({
   rating,
@@ -121,13 +120,8 @@ export default function ReviewsSection() {
   useEffect(() => {
     async function load() {
       try {
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("reviews")
-          .select("*")
-          .eq("approved", true)
-          .order("created_at", { ascending: false });
-        if (data) setReviews(data as Review[]);
+        const data = await getApprovedReviews();
+        setReviews(data);
       } catch {}
     }
     load();
@@ -160,10 +154,33 @@ export default function ReviewsSection() {
       setFormError("Foto muito grande (max 5MB).");
       return;
     }
-    setFormPhoto(file);
     const reader = new FileReader();
-    reader.onload = () => setFormPreview(reader.result as string);
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) {
+            h = Math.round((h / w) * maxSize);
+            w = maxSize;
+          } else {
+            w = Math.round((w / h) * maxSize);
+            h = maxSize;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        setFormPreview(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = reader.result as string;
+    };
     reader.readAsDataURL(file);
+    setFormPhoto(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,26 +197,10 @@ export default function ReviewsSection() {
     setFormSending(true);
 
     try {
-      let photoUrl = "";
-      if (formPhoto) {
-        const ext = formPhoto.name.split(".").pop() || "jpg";
-        const fileName = `review-${Date.now()}.${ext}`;
-        const supabase = createClient();
-        const { error: uploadErr } = await supabase.storage
-          .from("review-photos")
-          .upload(fileName, formPhoto);
-        if (!uploadErr) {
-          const { data: urlData } = supabase.storage
-            .from("review-photos")
-            .getPublicUrl(fileName);
-          photoUrl = urlData.publicUrl;
-        }
-      }
-
       await createReview({
         client_name: formName.trim(),
         instagram_handle: formInstagram.trim() || undefined,
-        photo_url: photoUrl || undefined,
+        photo_url: formPreview || undefined,
         rating: formRating,
         comment: formComment.trim() || undefined,
       });

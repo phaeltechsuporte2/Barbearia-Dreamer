@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import type { Review } from "@/lib/supabase";
 import { createReview, getApprovedReviews } from "@/lib/actions";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 function StarRating({
   rating,
@@ -250,6 +251,16 @@ export default function ReviewsSection() {
     }
   };
 
+  const sentModal = (
+    <ConfirmationModal
+      open={formSent}
+      onClose={() => setFormSent(false)}
+      title="Avaliacao Enviada!"
+      message="Obrigado! Sua avaliacao sera exibida no site apos a aprovacao do admin."
+      actionLabel="Ok"
+    />
+  );
+
   if (reviews.length === 0) {
     return (
       <section className="py-20 bg-[var(--bg-primary)]">
@@ -282,6 +293,7 @@ export default function ReviewsSection() {
             handleSubmit={handleSubmit}
           />
         </div>
+        {sentModal}
       </section>
     );
   }
@@ -421,6 +433,8 @@ export default function ReviewsSection() {
           }}
         />
       )}
+
+      {sentModal}
     </section>
   );
 }
@@ -462,22 +476,6 @@ function ReviewForm({
   formError: string;
   handleSubmit: (e: React.FormEvent) => void;
 }) {
-  if (formSent) {
-    return (
-      <div className="max-w-lg mx-auto text-center py-12 bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-2xl">
-        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        </div>
-        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-          Avaliacao Enviada!
-        </h3>
-        <p className="text-[var(--text-secondary)]">
-          Sua avaliacao sera exibida apos a aprovacao do admin.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-lg mx-auto bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-2xl p-8">
       <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6 text-center">

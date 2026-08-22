@@ -212,9 +212,10 @@ export default function ReviewsSection() {
       setFormComment("");
       setFormPhoto(null);
       setFormPreview(null);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Erro ao enviar avaliacao:", err);
-      setFormError("Erro ao enviar. Tente novamente.");
+      const msg = err instanceof Error ? err.message : String(err);
+      setFormError("Erro: " + msg);
     } finally {
       setFormSending(false);
     }

@@ -269,7 +269,10 @@ export async function createReview(review: {
     .select("*")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Erro ao criar review:", error.message, error.details, error.hint);
+    throw error;
+  }
   return data as Review;
 }
 

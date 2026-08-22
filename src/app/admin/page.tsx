@@ -440,12 +440,13 @@ export default function AdminPage() {
 
   const plansWithMeta = useMemo(() => {
     return plans
+      .filter((plan) => plan.end_date)
       .map((plan) => ({
         ...plan,
         daysRemaining: daysUntil(plan.end_date),
         expired: daysUntil(plan.end_date) < 0,
       }))
-      .sort((a, b) => a.end_date.localeCompare(b.end_date));
+      .sort((a, b) => (a.end_date ?? "").localeCompare(b.end_date ?? ""));
   }, [plans]);
 
   const expiringPlans = useMemo(() => {

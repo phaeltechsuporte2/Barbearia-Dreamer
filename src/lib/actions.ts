@@ -124,13 +124,17 @@ export async function getServices() {
 }
 
 export async function getPlans() {
-  const { data, error } = await supabase
-    .from("plans")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from("plans")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) throw error;
-  return data as Plan[];
+    if (error) return [];
+    return (data ?? []) as Plan[];
+  } catch {
+    return [];
+  }
 }
 
 export async function createPlan(plan: {

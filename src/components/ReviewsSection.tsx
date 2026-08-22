@@ -250,7 +250,7 @@ export default function ReviewsSection() {
     }
   };
 
-  if (reviews.length === 0 && !formSent) {
+  if (reviews.length === 0) {
     return (
       <section className="py-20 bg-[var(--bg-primary)]">
         <div className="container mx-auto px-6 md:px-12">

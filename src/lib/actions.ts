@@ -257,50 +257,70 @@ export async function createReview(review: {
   rating: number;
   comment?: string;
 }) {
-  const { data, error } = await supabase
-    .from("reviews")
-    .insert({
-      client_name: review.client_name,
-      instagram_handle: review.instagram_handle || null,
-      photo_url: review.photo_url || null,
-      rating: review.rating,
-      comment: review.comment || null,
-    })
-    .select("*")
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({
+        client_name: review.client_name,
+        instagram_handle: review.instagram_handle || null,
+        photo_url: review.photo_url || null,
+        rating: review.rating,
+        comment: review.comment || null,
+      })
+      .select("id")
+      .single();
 
-  if (error) {
-    console.error("Erro ao criar review:", error.message, error.details, error.hint);
-    return { success: false as const, error: error.message };
+    if (error) {
+      console.error("Erro ao criar review:", error.message, error.details, error.hint);
+      return { success: false as const, error: error.message };
+    }
+    return { success: true as const };
+  } catch (err) {
+    console.error("Excecao ao criar review:", err);
+    return { success: false as const, error: String(err) };
   }
-  return { success: true as const };
 }
 
 export async function approveReview(id: string) {
-  const { data, error } = await supabase
-    .from("reviews")
-    .update({ approved: true })
-    .eq("id", id)
-    .select("*")
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .update({ approved: true })
+      .eq("id", id)
+      .select("*")
+      .single();
 
-  if (error) throw error;
-  return data as Review;
+    if (error) throw error;
+    return data as Review;
+  } catch (err) {
+    console.error("Erro ao aprovar review:", err);
+    throw err;
+  }
 }
 
 export async function denyReview(id: string) {
-  const { data, error } = await supabase
-    .from("reviews")
-    .update({ approved: false })
-    .eq("id", id)
-    .select("*")
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .update({ approved: false })
+      .eq("id", id)
+      .select("*")
+      .single();
 
-  if (error) throw error;
-  return data as Review;
+    if (error) throw error;
+    return data as Review;
+  } catch (err) {
+    console.error("Erro ao negar review:", err);
+    throw err;
+  }
 }
 
 export async function deleteReview(id: string) {
-  const { error } = await supabase.from("reviews").delete().eq("id", id);
-  if (error) throw error;
+  try {
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) throw error;
+  } catch (err) {
+    console.error("Erro ao deletar review:", err);
+    throw err;
+  }
 }

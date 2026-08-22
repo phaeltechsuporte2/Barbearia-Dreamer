@@ -151,7 +151,7 @@ export default function Header() {
                 onClick={handleSignOut}
                 className={`px-4 py-2 rounded-full border font-medium transition-colors ${
                   isDark
-                    ? "border-white/20 text-gray-300 hover:text-brand-orange hover:border-brand-orange"
+                    ? "border-[var(--border-main)] text-gray-300 hover:text-brand-orange hover:border-brand-orange"
                     : "border-gray-300 text-gray-600 hover:text-brand-orange hover:border-brand-orange"
                 }`}
               >
@@ -198,7 +198,7 @@ export default function Header() {
       {menuOpen && (
         <div
           className={`md:hidden border-t mt-2 ${
-            isDark ? "bg-brand-dark/95 border-white/5" : "bg-white/95 border-gray-200"
+            isDark ? "bg-brand-dark/95 border-[var(--border-subtle)]" : "bg-white/95 border-gray-200"
           }`}
         >
           <nav className="flex flex-col items-center gap-5 py-8 px-6">
@@ -285,7 +285,7 @@ export default function Header() {
                   onClick={() => setMenuOpen(false)}
                   className={`w-full max-w-xs text-center py-3 rounded-full border font-medium transition-colors ${
                     isDark
-                      ? "border-white/20 text-gray-300 hover:border-brand-orange hover:text-brand-orange"
+                      ? "border-[var(--border-main)] text-gray-300 hover:border-brand-orange hover:text-brand-orange"
                       : "border-gray-300 text-gray-600 hover:border-brand-orange hover:text-brand-orange"
                   }`}
                 >
@@ -304,7 +304,7 @@ export default function Header() {
                 onClick={handleSignOut}
                 className={`w-full max-w-xs py-3 rounded-full border font-medium transition-colors ${
                   isDark
-                    ? "border-white/20 text-gray-300 hover:border-brand-orange hover:text-brand-orange"
+                    ? "border-[var(--border-main)] text-gray-300 hover:border-brand-orange hover:text-brand-orange"
                     : "border-gray-300 text-gray-600 hover:border-brand-orange hover:text-brand-orange"
                 }`}
               >

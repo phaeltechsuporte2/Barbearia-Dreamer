@@ -205,7 +205,7 @@ export default function SchedulingSection() {
       <section id="scheduling" className="py-24 bg-brand-dark relative overflow-hidden">
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-orange/5 rounded-full blur-[80px] pointer-events-none" />
         <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
-          <div className="max-w-md mx-auto bg-brand-black rounded-2xl p-8 border border-white/5">
+          <div className="max-w-md mx-auto bg-brand-black rounded-2xl p-8 border border-[var(--border-subtle)]">
             <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
@@ -213,8 +213,8 @@ export default function SchedulingSection() {
                 <line x1="15" x2="3" y1="12" y2="12" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3">Faca Login para Agendar</h3>
-            <p className="text-gray-400 mb-6">Voce precisa estar logado para fazer um agendamento.</p>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faca Login para Agendar</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Voce precisa estar logado para fazer um agendamento.</p>
             <div className="flex flex-col gap-3">
               <Link href="/auth/login" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
                 Entrar
@@ -238,11 +238,11 @@ export default function SchedulingSection() {
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 animate-fade-in-up">
             Agende seu{" "}
             <span className="text-brand-orange">Horario</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-100">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto animate-fade-in-up delay-100">
             Escolha o melhor horario para voce. Horarios atualizados em tempo
             real.
           </p>
@@ -273,40 +273,40 @@ export default function SchedulingSection() {
                 <path d="M20 6 9 17l-5-5" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
               Agendamento Confirmado!
             </h3>
-            <p className="text-gray-400 mb-6">
+            <p className="text-[var(--text-secondary)] mb-6">
               Seu horario foi agendado com sucesso
               {calendarConnected && " e sincronizado com o Google Calendar"}.
               Aguardamos voce!
             </p>
-            <div className="bg-white/5 rounded-xl p-4 mb-6 text-left">
+            <div className="bg-[var(--bg-subtle)] rounded-xl p-4 mb-6 text-left">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span className="text-gray-500">Servico:</span>
+                  <span className="text-[var(--text-muted)]">Servico:</span>
                 </div>
-                <div className="text-white font-medium">
+                <div className="text-[var(--text-primary)] font-medium">
                   {getSelectedServiceName()}
                 </div>
                 <div>
-                  <span className="text-gray-500">Barbeiro:</span>
+                  <span className="text-[var(--text-muted)]">Barbeiro:</span>
                 </div>
-                <div className="text-white font-medium">
+                <div className="text-[var(--text-primary)] font-medium">
                   {getSelectedBarberName()}
                 </div>
                 <div>
-                  <span className="text-gray-500">Data:</span>
+                  <span className="text-[var(--text-muted)]">Data:</span>
                 </div>
-                <div className="text-white font-medium">
+                <div className="text-[var(--text-primary)] font-medium">
                   {new Date(selectedDate + "T12:00:00").toLocaleDateString(
                     "pt-BR"
                   )}
                 </div>
                 <div>
-                  <span className="text-gray-500">Horario:</span>
+                  <span className="text-[var(--text-muted)]">Horario:</span>
                 </div>
-                <div className="text-white font-medium">{selectedTime}</div>
+                <div className="text-[var(--text-primary)] font-medium">{selectedTime}</div>
               </div>
             </div>
             <button
@@ -330,7 +330,7 @@ export default function SchedulingSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     Seu Nome
                   </label>
                   <input
@@ -338,13 +338,13 @@ export default function SchedulingSection() {
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     placeholder="Digite seu nome"
-                    className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange/50 transition-colors"
+                    className="w-full px-4 py-3 bg-brand-black border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     WhatsApp
                   </label>
                   <input
@@ -354,13 +354,13 @@ export default function SchedulingSection() {
                     inputMode="numeric"
                     maxLength={16}
                     placeholder="(11) 98834-6626"
-                    className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange/50 transition-colors"
+                    className="w-full px-4 py-3 bg-brand-black border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     Servico
                   </label>
                   <select
@@ -368,7 +368,7 @@ export default function SchedulingSection() {
                     onChange={(e) =>
                       setSelectedServiceId(Number(e.target.value))
                     }
-                    className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand-orange/50 transition-colors"
+                    className="w-full px-4 py-3 bg-brand-black border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   >
                     <option value="">Selecione o servico</option>
@@ -382,7 +382,7 @@ export default function SchedulingSection() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     Barbeiro
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -394,10 +394,10 @@ export default function SchedulingSection() {
                         className={`p-3 rounded-xl border text-center transition-all ${
                           selectedBarber === barber.id
                             ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
-                            : "border-white/10 bg-brand-black text-gray-400 hover:border-white/20"
+                            : "border-[var(--border-main)] bg-brand-black text-[var(--text-secondary)] hover:border-[var(--border-main)]"
                         }`}
                       >
-                        <div className="text-white font-medium text-sm">
+                        <div className="text-[var(--text-primary)] font-medium text-sm">
                           {barber.name}
                         </div>
                       </button>
@@ -408,7 +408,7 @@ export default function SchedulingSection() {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     Data
                   </label>
                   <input
@@ -416,13 +416,13 @@ export default function SchedulingSection() {
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     min={getMinDate()}
-                    className="w-full px-4 py-3 bg-brand-black border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand-orange/50 transition-colors"
+                    className="w-full px-4 py-3 bg-brand-black border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-3">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-3">
                     Horario
                     {loadingSlots && (
                       <span className="text-brand-orange text-sm font-normal ml-2">
@@ -431,13 +431,13 @@ export default function SchedulingSection() {
                     )}
                   </label>
                   {!selectedDate ? (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-[var(--text-muted)]">
                       Selecione uma data para ver os horarios disponiveis
                     </div>
                   ) : loadingSlots ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="w-6 h-6 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
-                      <span className="ml-3 text-gray-400">
+                      <span className="ml-3 text-[var(--text-secondary)]">
                         Carregando horarios...
                       </span>
                     </div>
@@ -469,15 +469,15 @@ export default function SchedulingSection() {
                     <div className="flex items-center gap-4 mt-3 text-xs">
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-brand-orange" />
-                        <span className="text-gray-500">Selecionado</span>
+                        <span className="text-[var(--text-muted)]">Selecionado</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-green-500/15 border border-green-500/30" />
-                        <span className="text-gray-500">Disponivel</span>
+                        <span className="text-[var(--text-muted)]">Disponivel</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-gray-800 border border-gray-700" />
-                        <span className="text-gray-500">Indisponivel</span>
+                        <span className="text-[var(--text-muted)]">Indisponivel</span>
                       </div>
                     </div>
                   )}
@@ -495,7 +495,7 @@ export default function SchedulingSection() {
                   {loading ? "Agendando..." : "Confirmar Agendamento"}
                 </button>
 
-                <p className="text-center text-gray-500 text-sm mt-4">
+                <p className="text-center text-[var(--text-muted)] text-sm mt-4">
                   {calendarConnected
                     ? "Sincronizado com Google Calendar"
                     : "Seu horario sera salvo automaticamente"}

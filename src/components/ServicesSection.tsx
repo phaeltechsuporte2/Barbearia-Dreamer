@@ -102,11 +102,11 @@ export default function ServicesSection() {
     <section id="services" className="py-24 bg-brand-black">
       <div className="container mx-auto px-6 md:px-12">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 animate-fade-in-up">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 animate-fade-in-up">
             Nossos{" "}
             <span className="text-brand-orange">Servicos</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-100">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto animate-fade-in-up delay-100">
             Oferecemos uma linha completa de servicos para cuidar do seu visual
             com qualidade e estilo.
           </p>
@@ -116,17 +116,17 @@ export default function ServicesSection() {
           {services.map((service, index) => (
             <div
               key={service.name}
-              className={`bg-brand-dark rounded-2xl p-6 border border-white/5 hover:border-brand-orange/40 shadow-lg hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] transition-all group cursor-pointer flex flex-col items-start h-full animate-fade-in-up delay-${(index + 2) * 100}`}
+              className={`bg-brand-dark rounded-2xl p-6 border border-[var(--border-subtle)] hover:border-brand-orange/40 shadow-lg hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] transition-all group cursor-pointer flex flex-col items-start h-full animate-fade-in-up delay-${(index + 2) * 100}`}
             >
-              <div className="w-12 h-12 bg-white/5 group-hover:bg-brand-orange/10 rounded-xl flex items-center justify-center mb-6 transition-colors">
+              <div className="w-12 h-12 bg-[var(--bg-subtle)] group-hover:bg-brand-orange/10 rounded-xl flex items-center justify-center mb-6 transition-colors">
                 <span className="text-brand-orange group-hover:text-brand-orange-light transition-colors">
                   {service.icon}
                 </span>
               </div>
-              <h4 className="text-white font-bold text-lg mb-2 leading-tight group-hover:text-brand-orange transition-colors">
+              <h4 className="text-[var(--text-primary)] font-bold text-lg mb-2 leading-tight group-hover:text-brand-orange transition-colors">
                 {service.name}
               </h4>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4 flex-grow">
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4 flex-grow">
                 {service.description}
               </p>
               <div className="flex items-center justify-between w-full mt-auto">
@@ -134,7 +134,7 @@ export default function ServicesSection() {
                   <span className="text-brand-orange font-bold text-xl">
                     {service.price}
                   </span>
-                  <span className="text-gray-500 text-sm ml-2">
+                  <span className="text-[var(--text-muted)] text-sm ml-2">
                     {service.duration}
                   </span>
                 </div>

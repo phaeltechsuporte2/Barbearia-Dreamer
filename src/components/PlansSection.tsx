@@ -112,15 +112,15 @@ export default function PlansSection() {
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4">
             Nossos <span className="text-brand-orange">Planos</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto mb-10">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto mb-10">
             Economize assinando um plano. Quanto maior o periodo, maior o
             desconto!
           </p>
 
-          <div className="inline-flex items-center bg-brand-dark rounded-full p-1 border border-white/10">
+          <div className="inline-flex items-center bg-brand-dark rounded-full p-1 border border-[var(--border-main)]">
             {(["mensal", "trimestral", "semestral", "anual"] as Period[]).map(
               (p) => (
                 <button
@@ -129,7 +129,7 @@ export default function PlansSection() {
                   className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
                     period === p
                       ? "bg-brand-orange text-brand-black shadow-lg"
-                      : "text-gray-400 hover:text-white"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {periodLabels[p]}
@@ -169,7 +169,7 @@ export default function PlansSection() {
                 className={`relative rounded-3xl p-8 transition-all ${
                   plan.popular
                     ? "bg-brand-dark border-2 border-brand-orange shadow-[0_0_40px_rgba(249,115,22,0.15)] scale-105"
-                    : "bg-brand-dark border border-white/10 hover:border-white/20"
+                    : "bg-brand-dark border border-[var(--border-main)] hover:border-[var(--border-main)]"
                 }`}
               >
                 {plan.popular && (
@@ -185,36 +185,36 @@ export default function PlansSection() {
                         ? "text-brand-orange"
                         : plan.color === "gold"
                           ? "text-brand-gold"
-                          : "text-white"
+                          : "text-[var(--text-primary)]"
                     }`}
                   >
                     {plan.name}
                   </h3>
-                  <p className="text-gray-500 text-sm">{plan.description}</p>
+                  <p className="text-[var(--text-muted)] text-sm">{plan.description}</p>
                 </div>
 
                 <div className="text-center mb-8">
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-gray-500 text-lg">R$</span>
+                    <span className="text-[var(--text-muted)] text-lg">R$</span>
                     <span
                       className={`text-5xl font-bold ${
                         plan.color === "orange"
                           ? "text-brand-orange"
                           : plan.color === "gold"
                             ? "text-brand-gold"
-                            : "text-white"
+                            : "text-[var(--text-primary)]"
                       }`}
                     >
                       {perMonth.toFixed(0).replace(".", ",")}
                     </span>
-                    <span className="text-gray-500">,90</span>
+                    <span className="text-[var(--text-muted)]">,90</span>
                   </div>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-[var(--text-muted)] text-sm mt-1">
                     por mes{period !== "mensal" && ` (${months}x)`}
                   </p>
                   {period !== "mensal" && (
                     <div className="mt-2">
-                      <span className="text-gray-600 text-xs line-through">
+                      <span className="text-[var(--text-muted)] text-xs line-through">
                         R${" "}
                         {(plan.monthlyPrice * months)
                           .toFixed(2)
@@ -279,7 +279,7 @@ export default function PlansSection() {
                       )}
                       <span
                         className={`text-sm ${
-                          feature.included ? "text-gray-300" : "text-gray-600"
+                          feature.included ? "text-[var(--text-secondary)]" : "text-[var(--text-muted)]"
                         }`}
                       >
                         {feature.text}
@@ -294,7 +294,7 @@ export default function PlansSection() {
                       ? "bg-brand-orange text-brand-black hover:bg-brand-orange-light shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
                       : plan.color === "gold"
                         ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/30 hover:bg-brand-gold/20"
-                        : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                        : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-main)] hover:bg-[var(--bg-subtle-hover)]"
                   }`}
                 >
                   Assinar {plan.name}
@@ -305,7 +305,7 @@ export default function PlansSection() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-500 text-sm">
+          <p className="text-[var(--text-muted)] text-sm">
             Todos os planos possuem cancelamento a qualquer momento. Sem
             multa ou fidelidade.
           </p>

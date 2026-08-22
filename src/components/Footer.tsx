@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-brand-black border-t border-white/10 pt-16 pb-8">
+    <footer className="bg-brand-black border-t border-[var(--border-main)] pt-16 pb-8">
       <div className="container mx-auto px-6 md:px-12">
         <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-12">
           <div className="flex flex-col items-center md:items-start">
@@ -16,21 +16,21 @@ export default function Footer() {
                 Barbearia Dreamer
               </span>
             </Link>
-            <p className="text-gray-400 text-center md:text-left max-w-sm">
+            <p className="text-[var(--text-secondary)] text-center md:text-left max-w-sm">
               Seu Estilo, Nosso Arte. Barbearia premium com atendimento de
               primeira linha.
             </p>
           </div>
 
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-white font-semibold text-lg mb-4">
+            <h4 className="text-[var(--text-primary)] font-semibold text-lg mb-4">
               Links Rapidos
             </h4>
             <ul className="space-y-2 text-center md:text-left">
               <li>
                 <a
                   href="#home"
-                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
                   Inicio
                 </a>
@@ -38,7 +38,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#about"
-                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
                   Sobre
                 </a>
@@ -46,7 +46,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#services"
-                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
                   Servicos
                 </a>
@@ -54,7 +54,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#plans"
-                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
                   Planos
                 </a>
@@ -62,7 +62,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#scheduling"
-                  className="text-gray-400 hover:text-brand-orange transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
                   Agendamento
                 </a>
@@ -71,13 +71,13 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-white font-semibold text-lg mb-4">Contato</h4>
+            <h4 className="text-[var(--text-primary)] font-semibold text-lg mb-4">Contato</h4>
             <div className="flex gap-4">
               <a
                 href="https://instagram.com/barbeariadreamer"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-[#E1306C] hover:text-white transition-all"
+                className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[#E1306C] hover:text-[var(--text-primary)] transition-all"
                 aria-label="Instagram"
               >
                 <svg
@@ -100,7 +100,7 @@ export default function Footer() {
                 href="https://wa.me/5511999999999?text=Ola!%20Gostaria%20de%20agendar!"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-[#25D366] hover:text-white transition-all"
+                className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[#25D366] hover:text-[var(--text-primary)] transition-all"
                 aria-label="WhatsApp"
               >
                 <svg
@@ -121,7 +121,7 @@ export default function Footer() {
                 href="https://www.tiktok.com/@barbeariadreamer"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white transition-all"
+                className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black hover:text-[var(--text-primary)] transition-all"
                 aria-label="TikTok"
               >
                 <svg
@@ -138,11 +138,11 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-sm text-center">
+        <div className="border-t border-[var(--border-main)] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[var(--text-muted)] text-sm text-center">
             &copy; 2026 Barbearia Dreamer. Todos os direitos reservados.
           </p>
-          <p className="text-gray-600 text-xs text-center">
+          <p className="text-[var(--text-muted)] text-xs text-center">
             Horario de funcionamento: Seg-Sab 09:00 - 19:00
           </p>
         </div>

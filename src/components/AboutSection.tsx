@@ -14,11 +14,11 @@ export default function AboutSection() {
           </div>
 
           <div className="w-full md:w-1/2 animate-fade-in-right">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-6">
               Bem-vindo a{" "}
               <span className="text-brand-orange">Barbearia Dreamer</span>
             </h2>
-            <div className="space-y-6 text-gray-300 text-lg leading-relaxed">
+            <div className="space-y-6 text-[var(--text-secondary)] text-lg leading-relaxed">
               <p>
                 Somos uma barbearia que nasceu da paixao por transformar visuais
                 e criar experiencias unicas. Aqui, cada corte e cada barba sao

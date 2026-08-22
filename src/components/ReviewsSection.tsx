@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createClient } from "@/lib/supabase-browser";
 import type { Review } from "@/lib/supabase";
 import { createReview, getApprovedReviews } from "@/lib/actions";
 
@@ -197,13 +198,43 @@ export default function ReviewsSection() {
     setFormSending(true);
 
     try {
-      await createReview({
+      let photoUrl = formPreview || undefined;
+
+      if (formPreview && formPhoto) {
+        const supabase = createClient();
+        const ext = formPhoto.name.split(".").pop() || "jpg";
+        const fileName = "review-" + Date.now() + "." + ext;
+
+        const res = await fetch(formPreview);
+        const blob = await res.blob();
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from("review-photos")
+          .upload(fileName, file);
+
+        if (!uploadErr && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from("review-photos")
+            .getPublicUrl(fileName);
+          photoUrl = urlData.publicUrl;
+        } else {
+          console.warn("Storage upload falhou, usando base64:", uploadErr?.message);
+        }
+      }
+
+      const result = await createReview({
         client_name: formName.trim(),
         instagram_handle: formInstagram.trim() || undefined,
-        photo_url: formPreview || undefined,
+        photo_url: photoUrl,
         rating: formRating,
         comment: formComment.trim() || undefined,
       });
+
+      if (!result.success) {
+        setFormError("Erro: " + result.error);
+        return;
+      }
 
       setFormSent(true);
       setFormName("");
@@ -243,7 +274,9 @@ export default function ReviewsSection() {
             formComment={formComment}
             setFormComment={setFormComment}
             formPhoto={formPhoto}
+            setFormPhoto={setFormPhoto}
             formPreview={formPreview}
+            setFormPreview={setFormPreview}
             handlePhotoChange={handlePhotoChange}
             formSending={formSending}
             formSent={formSent}
@@ -369,7 +402,9 @@ export default function ReviewsSection() {
           formComment={formComment}
           setFormComment={setFormComment}
           formPhoto={formPhoto}
+          setFormPhoto={setFormPhoto}
           formPreview={formPreview}
+          setFormPreview={setFormPreview}
           handlePhotoChange={handlePhotoChange}
           formSending={formSending}
           formSent={formSent}
@@ -402,7 +437,9 @@ function ReviewForm({
   formComment,
   setFormComment,
   formPhoto: _formPhoto,
+  setFormPhoto,
   formPreview,
+  setFormPreview,
   handlePhotoChange,
   formSending,
   formSent,
@@ -418,7 +455,9 @@ function ReviewForm({
   formComment: string;
   setFormComment: (v: string) => void;
   formPhoto: File | null;
+  setFormPhoto: (v: File | null) => void;
   formPreview: string | null;
+  setFormPreview: (v: string | null) => void;
   handlePhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   formSending: boolean;
   formSent: boolean;
@@ -495,11 +534,23 @@ function ReviewForm({
             />
           </label>
           {formPreview && (
-            <img
-              src={formPreview}
-              alt="Preview"
-              className="mt-3 w-24 h-24 object-cover rounded-xl border border-white/10"
-            />
+            <div className="relative inline-block mt-3">
+              <img
+                src={formPreview}
+                alt="Preview"
+                className="w-24 h-24 object-cover rounded-xl border border-white/10"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setFormPreview(null);
+                  setFormPhoto(null);
+                }}
+                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600 transition-colors shadow-lg"
+              >
+                X
+              </button>
+            </div>
           )}
         </div>
 

@@ -271,9 +271,9 @@ export async function createReview(review: {
 
   if (error) {
     console.error("Erro ao criar review:", error.message, error.details, error.hint);
-    throw error;
+    return { success: false as const, error: error.message };
   }
-  return data as Review;
+  return { success: true as const, data: data as Review };
 }
 
 export async function approveReview(id: string) {

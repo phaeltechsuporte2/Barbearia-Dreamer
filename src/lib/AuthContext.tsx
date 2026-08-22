@@ -78,9 +78,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatar_url: meta.avatar_url ?? meta.picture ?? null,
         last_login: new Date().toISOString(),
       };
+
+      const { data: existing } = await getSupabase()
+        .from("site_users")
+        .select("auth_user_id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
       await getSupabase()
         .from("site_users")
         .upsert(row, { onConflict: "auth_user_id" });
+
+      if (!existing && row.email) {
+        void fetch("/api/email/welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: row.name, email: row.email }),
+        }).catch(() => {});
+      }
     } catch {
       // a captura de dados nao deve bloquear o login
     }

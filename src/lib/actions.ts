@@ -1,6 +1,8 @@
 "use server";
 
 import { supabase, type Appointment, type Plan, type Client, type PlanCatalog, type Review } from "@/lib/supabase";
+import { sendGmail } from "./gmail";
+import { buildPlanActivatedEmail, formatBRDate } from "./plan-emails";
 
 export async function getAppointments(filters?: {
   date?: string;
@@ -154,6 +156,26 @@ export async function createPlan(plan: {
     .single();
 
   if (error) throw error;
+
+  if (data && plan.client_email) {
+    try {
+      await sendGmail(
+        plan.client_email,
+        `${plan.client_name}, seu plano ${plan.plan_name} foi ativado!`,
+        buildPlanActivatedEmail({
+          clientName: plan.client_name,
+          planName: plan.plan_name,
+          planType: plan.plan_type,
+          amountPaid: plan.amount_paid,
+          startDate: formatBRDate(plan.start_date),
+          endDate: formatBRDate(plan.end_date),
+        })
+      );
+    } catch (emailError) {
+      console.error("Falha ao enviar e-mail de plano ativado:", emailError);
+    }
+  }
+
   return data as Plan;
 }
 

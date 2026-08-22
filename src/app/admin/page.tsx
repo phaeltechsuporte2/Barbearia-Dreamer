@@ -11,7 +11,6 @@ import {
   createPlan as createPlanAction,
 } from "@/lib/actions";
 import type { Appointment, Plan } from "@/lib/supabase";
-import { createClient } from "@/lib/supabase-browser";
 
 type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
@@ -274,45 +273,11 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    let channel: ReturnType<ReturnType<typeof createClient>["channel"]> | null = null;
-    let supabase: ReturnType<typeof createClient> | null = null;
-
-    try {
-      supabase = createClient();
-
-      channel = supabase
-        .channel("admin-realtime")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "appointments" },
-          () => {
-            loadDataRef.current();
-          }
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "plans" },
-          () => {
-            loadDataRef.current();
-          }
-        )
-        .subscribe();
-    } catch (err) {
-      console.warn("Realtime nao disponivel, usando polling:", err);
-    }
-
     const interval = setInterval(() => {
       loadDataRef.current();
-    }, 30000);
+    }, 15000);
 
-    return () => {
-      if (supabase && channel) {
-        try {
-          supabase.removeChannel(channel);
-        } catch {}
-      }
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   async function handleStatusChange(

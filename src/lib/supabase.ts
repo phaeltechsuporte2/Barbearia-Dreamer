@@ -63,3 +63,14 @@ export interface PlanCatalog {
   period: string;
   price: number;
 }
+
+export interface Review {
+  id: string;
+  client_name: string;
+  instagram_handle: string | null;
+  photo_url: string | null;
+  rating: number;
+  comment: string | null;
+  approved: boolean;
+  created_at: string;
+}

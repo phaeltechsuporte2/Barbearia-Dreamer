@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase, type Appointment, type Plan, type Client, type PlanCatalog } from "@/lib/supabase";
+import { supabase, type Appointment, type Plan, type Client, type PlanCatalog, type Review } from "@/lib/supabase";
 
 export async function getAppointments(filters?: {
   date?: string;
@@ -219,4 +219,85 @@ export async function getPlanCatalog() {
   } catch {
     return [];
   }
+}
+
+export async function getApprovedReviews() {
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .eq("approved", true)
+      .order("created_at", { ascending: false });
+
+    if (error) return [];
+    return (data ?? []) as Review[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getAllReviews() {
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) return [];
+    return (data ?? []) as Review[];
+  } catch {
+    return [];
+  }
+}
+
+export async function createReview(review: {
+  client_name: string;
+  instagram_handle?: string;
+  photo_url?: string;
+  rating: number;
+  comment?: string;
+}) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .insert({
+      client_name: review.client_name,
+      instagram_handle: review.instagram_handle || null,
+      photo_url: review.photo_url || null,
+      rating: review.rating,
+      comment: review.comment || null,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data as Review;
+}
+
+export async function approveReview(id: string) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .update({ approved: true })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data as Review;
+}
+
+export async function denyReview(id: string) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .update({ approved: false })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data as Review;
+}
+
+export async function deleteReview(id: string) {
+  const { error } = await supabase.from("reviews").delete().eq("id", id);
+  if (error) throw error;
 }

@@ -13,10 +13,14 @@ import {
   createClientAction,
   deleteClient,
   getPlanCatalog,
+  getAllReviews,
+  approveReview,
+  denyReview,
+  deleteReview,
 } from "@/lib/actions";
-import type { Appointment, Plan, Client, PlanCatalog } from "@/lib/supabase";
+import type { Appointment, Plan, Client, PlanCatalog, Review } from "@/lib/supabase";
 
-type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes" | "clientes";
+type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes" | "clientes" | "avaliacoes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
 
 const PLAN_DURATIONS: Record<PlanType, number> = {
@@ -206,6 +210,15 @@ const NAV_ITEMS: { id: Tab; label: string; icon: ReactNode }[] = [
       </>
     ),
   },
+  {
+    id: "avaliacoes",
+    label: "Avaliacoes",
+    icon: (
+      <>
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </>
+    ),
+  },
 ];
 
 const TAB_TITLES: Record<Tab, { title: string; subtitle: string }> = {
@@ -226,6 +239,10 @@ const TAB_TITLES: Record<Tab, { title: string; subtitle: string }> = {
   clientes: {
     title: "Clientes",
     subtitle: "Gerencie seus clientes",
+  },
+  avaliacoes: {
+    title: "Avaliacoes",
+    subtitle: "Aprove ou negue as avaliacoes dos clientes",
   },
 };
 
@@ -279,20 +296,24 @@ export default function AdminPage() {
 
   const [previewReminder, setPreviewReminder] = useState<(Plan & { daysRemaining: number }) | null>(null);
 
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+
   async function loadData() {
     try {
-      const [appointmentsData, statsData, plansData, clientsData, catalogData] = await Promise.all([
+      const [appointmentsData, statsData, plansData, clientsData, catalogData, reviewsData] = await Promise.all([
         getAppointments(),
         getRevenueStats(),
         getPlans(),
         getClients(),
         getPlanCatalog(),
+        getAllReviews(),
       ]);
       setAppointments(appointmentsData);
       setStats(statsData);
       setPlans(plansData);
       setClients(clientsData);
       setPlanCatalog(catalogData);
+      setAllReviews(reviewsData);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
     } finally {
@@ -484,6 +505,33 @@ export default function AdminPage() {
       setClients((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       console.error("Erro ao deletar cliente:", err);
+    }
+  }
+
+  async function handleApproveReview(id: string) {
+    try {
+      const updated = await approveReview(id);
+      setAllReviews((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    } catch (err) {
+      console.error("Erro ao aprovar avaliacao:", err);
+    }
+  }
+
+  async function handleDenyReview(id: string) {
+    try {
+      const updated = await denyReview(id);
+      setAllReviews((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    } catch (err) {
+      console.error("Erro ao negar avaliacao:", err);
+    }
+  }
+
+  async function handleDeleteReview(id: string) {
+    try {
+      await deleteReview(id);
+      setAllReviews((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      console.error("Erro ao deletar avaliacao:", err);
     }
   }
 
@@ -1808,6 +1856,97 @@ export default function AdminPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "avaliacoes" && (
+              <div className="bg-brand-dark rounded-2xl border border-white/5">
+                <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Avaliacoes dos Clientes</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {allReviews.filter((r) => !r.approved).length} pendente(s) de aprovacao
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  {allReviews.length === 0 && (
+                    <div className="px-6 py-12 text-center text-gray-500">
+                      Nenhuma avaliacao enviada ainda
+                    </div>
+                  )}
+                  {allReviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="flex flex-col sm:flex-row sm:items-start gap-4 p-4 md:p-6 border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] transition-colors"
+                    >
+                      <div className="flex items-start gap-4 min-w-0 flex-1">
+                        {review.photo_url && (
+                          <img
+                            src={review.photo_url}
+                            alt={review.client_name}
+                            className="w-20 h-20 object-cover rounded-xl border border-white/10 shrink-0"
+                          />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="font-medium text-white">{review.client_name}</span>
+                            {review.instagram_handle && (
+                              <span className="text-brand-orange text-sm">@{review.instagram_handle.replace("@", "")}</span>
+                            )}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              review.approved
+                                ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                : "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+                            }`}>
+                              {review.approved ? "Aprovada" : "Pendente"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <svg key={star} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={star <= review.rating ? "#F97316" : "none"} stroke={star <= review.rating ? "#F97316" : "#4B5563"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                            <span className="text-gray-500 text-sm ml-1">{review.rating}/5</span>
+                          </div>
+                          {review.comment && (
+                            <p className="text-gray-400 text-sm mt-2 italic">&ldquo;{review.comment}&rdquo;</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!review.approved ? (
+                          <button
+                            onClick={() => handleApproveReview(review.id)}
+                            className="flex items-center justify-center gap-1 px-3 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 transition-colors"
+                          >
+                            <Icon size={14}><path d="M20 6 9 17l-5-5"/></Icon>
+                            Aprovar
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleDenyReview(review.id)}
+                            className="flex items-center justify-center gap-1 px-3 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors"
+                          >
+                            <Icon size={14}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>
+                            Negar
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteReview(review.id)}
+                          className="flex items-center justify-center gap-1 px-3 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                        >
+                          <Icon size={14}>
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                          </Icon>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

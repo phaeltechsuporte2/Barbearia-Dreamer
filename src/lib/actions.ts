@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase, type Appointment } from "@/lib/supabase";
+import { supabase, type Appointment, type Plan } from "@/lib/supabase";
 
 export async function getAppointments(filters?: {
   date?: string;
@@ -121,4 +121,39 @@ export async function getServices() {
 
   if (error) throw error;
   return data;
+}
+
+export async function getPlans() {
+  const { data, error } = await supabase
+    .from("plans")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as Plan[];
+}
+
+export async function createPlan(plan: {
+  client_name: string;
+  client_email: string;
+  client_phone?: string;
+  plan_name: string;
+  plan_type: string;
+  amount_paid: number;
+  start_date: string;
+  end_date: string;
+}) {
+  const { data, error } = await supabase
+    .from("plans")
+    .insert(plan)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data as Plan;
+}
+
+export async function deletePlan(id: string) {
+  const { error } = await supabase.from("plans").delete().eq("id", id);
+  if (error) throw error;
 }

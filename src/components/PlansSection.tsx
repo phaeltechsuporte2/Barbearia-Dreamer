@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/AuthContext";
+import { createPlan } from "@/lib/actions";
 
 type Period = "mensal" | "trimestral" | "semestral" | "anual";
 
@@ -16,6 +19,13 @@ const periodDiscounts: Record<Period, number> = {
   trimestral: 10,
   semestral: 20,
   anual: 30,
+};
+
+const PLAN_DAYS: Record<Period, number> = {
+  mensal: 30,
+  trimestral: 90,
+  semestral: 180,
+  anual: 365,
 };
 
 const plans = [
@@ -98,8 +108,129 @@ function getPerMonth(monthly: number, period: Period): number {
   return total / months;
 }
 
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function getTodayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export default function PlansSection() {
+  const { user, loading: authLoading } = useAuth();
   const [period, setPeriod] = useState<Period>("mensal");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      const meta = user.user_metadata;
+      if (meta?.name && !clientName) setClientName(meta.name);
+    }
+  }, [user]);
+
+  const maskPhone = (value: string) => {
+    const d = value.replace(/\D/g, "").slice(0, 11);
+    if (d.length <= 2) return `(${d}`;
+    if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  };
+
+  async function handleSubscribe(planName: string) {
+    if (!user) return;
+    if (!clientName.trim() || !clientPhone.trim()) {
+      setError("Preencha nome e telefone.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const today = getTodayStr();
+      const plan = plans.find((p) => p.name === planName)!;
+      await createPlan({
+        client_name: clientName.trim(),
+        client_email: user.email || "",
+        client_phone: clientPhone.trim(),
+        plan_name: planName,
+        plan_type: periodLabels[period],
+        amount_paid: getPrice(plan.monthlyPrice, period),
+        start_date: today,
+        end_date: addDays(today, PLAN_DAYS[period]),
+      });
+      setSuccess(true);
+      setSelectedPlan(null);
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao cadastrar plano. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <div className="max-w-md mx-auto bg-brand-dark rounded-2xl p-8 border border-[var(--border-subtle)]">
+            <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <line x1="2" x2="22" y1="10" y2="10" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faca Login para Assinar</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Voce precisa estar logado para assinar um plano.</p>
+            <div className="flex flex-col gap-3">
+              <Link href="/auth/login" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
+                Entrar
+              </Link>
+              <Link href="/auth/register" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 border border-brand-orange text-brand-orange rounded-full font-semibold hover:bg-brand-orange/10 transition-all">
+                Criar Conta
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (success) {
+    return (
+      <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <div className="max-w-md mx-auto bg-brand-dark rounded-2xl p-8 border border-green-500/30">
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Plano Cadastrado!</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Seu plano foi cadastrado com sucesso.</p>
+            <button onClick={() => setSuccess(false)} className="px-8 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
+              Ver Outros Planos
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
@@ -289,6 +420,7 @@ export default function PlansSection() {
                 </ul>
 
                 <button
+                  onClick={() => setSelectedPlan(plan.name)}
                   className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
                     plan.popular
                       ? "bg-brand-orange text-brand-black hover:bg-brand-orange-light shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
@@ -311,6 +443,75 @@ export default function PlansSection() {
           </p>
         </div>
       </div>
+
+      {selectedPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setSelectedPlan(null); setError(""); }}>
+          <div className="bg-brand-dark rounded-2xl p-6 md:p-8 border border-[var(--border-main)] max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                Assinar {selectedPlan}
+              </h3>
+              <button onClick={() => { setSelectedPlan(null); setError(""); }} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+
+            <div className="bg-[var(--bg-subtle)] rounded-xl p-4 mb-6 text-center">
+              <p className="text-[var(--text-muted)] text-sm">Plano {periodLabels[period]}</p>
+              <p className="text-2xl font-bold text-brand-orange mt-1">
+                R$ {getPrice(plans.find((p) => p.name === selectedPlan)!.monthlyPrice, period).toFixed(2).replace(".", ",")}
+              </p>
+              <p className="text-[var(--text-muted)] text-xs mt-1">
+                {PLAN_DAYS[period]} dias de duracao
+              </p>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(selectedPlan); }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Nome</label>
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Seu nome"
+                  className="w-full px-4 py-3 bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-brand-orange/50 transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">WhatsApp</label>
+                <input
+                  type="tel"
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(maskPhone(e.target.value))}
+                  inputMode="numeric"
+                  maxLength={16}
+                  placeholder="(11) 98834-6626"
+                  className="w-full px-4 py-3 bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-brand-orange/50 transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  readOnly
+                  className="w-full px-4 py-3 bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-xl text-[var(--text-muted)] opacity-60 cursor-not-allowed"
+                />
+              </div>
+              {error && <p className="text-sm text-red-400">{error}</p>}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full min-h-[44px] px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {loading ? "Cadastrando..." : "Confirmar Assinatura"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

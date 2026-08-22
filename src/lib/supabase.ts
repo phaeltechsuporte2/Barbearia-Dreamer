@@ -21,6 +21,19 @@ export interface Service {
   active: boolean;
 }
 
+export interface Plan {
+  id: string;
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  plan_name: string;
+  plan_type: string;
+  amount_paid: number;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+}
+
 export interface Appointment {
   id: string;
   client_name: string;

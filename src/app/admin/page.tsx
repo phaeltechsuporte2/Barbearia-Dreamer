@@ -7,21 +7,13 @@ import {
   getAppointments,
   getRevenueStats,
   updateAppointmentStatus,
+  getPlans,
+  createPlan as createPlanAction,
 } from "@/lib/actions";
-import type { Appointment } from "@/lib/supabase";
+import type { Appointment, Plan } from "@/lib/supabase";
 
 type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
-
-interface Plan {
-  id: string;
-  client_name: string;
-  client_email: string;
-  plan_type: PlanType;
-  amount_paid: number;
-  start_date: string;
-  end_date: string;
-}
 
 const PLAN_DURATIONS: Record<PlanType, number> = {
   Mensal: 30,
@@ -243,6 +235,8 @@ export default function AdminPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planName, setPlanName] = useState("");
   const [planEmail, setPlanEmail] = useState("");
+  const [planPhone, setPlanPhone] = useState("");
+  const [planPlanName, setPlanPlanName] = useState("Basico");
   const [planType, setPlanType] = useState<PlanType>("Mensal");
   const [planAmount, setPlanAmount] = useState("");
   const [planStartDate, setPlanStartDate] = useState(getTodayStr());
@@ -252,18 +246,22 @@ export default function AdminPage() {
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [sendingAll, setSendingAll] = useState(false);
 
+  const [previewPlan, setPreviewPlan] = useState<(Plan & { daysRemaining: number }) | null>(null);
+
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
     try {
-      const [appointmentsData, statsData] = await Promise.all([
+      const [appointmentsData, statsData, plansData] = await Promise.all([
         getAppointments(),
         getRevenueStats(),
+        getPlans(),
       ]);
       setAppointments(appointmentsData);
       setStats(statsData);
+      setPlans(plansData);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
     } finally {
@@ -290,7 +288,7 @@ export default function AdminPage() {
     }
   }
 
-  function handleAddPlan(e: React.FormEvent) {
+  async function handleAddPlan(e: React.FormEvent) {
     e.preventDefault();
     const amount = parseFloat(planAmount);
     if (
@@ -304,24 +302,29 @@ export default function AdminPage() {
       return;
     }
     setPlanError("");
-    const newPlan: Plan = {
-      id:
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}`,
-      client_name: planName.trim(),
-      client_email: planEmail.trim(),
-      plan_type: planType,
-      amount_paid: amount,
-      start_date: planStartDate,
-      end_date: addDays(planStartDate, PLAN_DURATIONS[planType]),
-    };
-    setPlans((prev) => [newPlan, ...prev]);
-    setPlanName("");
-    setPlanEmail("");
-    setPlanAmount("");
-    setPlanType("Mensal");
-    setPlanStartDate(getTodayStr());
+    try {
+      const newPlan = await createPlanAction({
+        client_name: planName.trim(),
+        client_email: planEmail.trim(),
+        client_phone: planPhone.trim(),
+        plan_name: planPlanName,
+        plan_type: planType,
+        amount_paid: amount,
+        start_date: planStartDate,
+        end_date: addDays(planStartDate, PLAN_DURATIONS[planType]),
+      });
+      setPlans((prev) => [newPlan, ...prev]);
+      setPlanName("");
+      setPlanEmail("");
+      setPlanPhone("");
+      setPlanAmount("");
+      setPlanPlanName("Basico");
+      setPlanType("Mensal");
+      setPlanStartDate(getTodayStr());
+    } catch (err) {
+      console.error("Erro ao criar plano:", err);
+      setPlanError("Erro ao criar plano. Tente novamente.");
+    }
   }
 
   async function sendReminder(id: string) {
@@ -338,23 +341,26 @@ export default function AdminPage() {
     setSendingAll(false);
   }
 
-  async function sendPlanEmail(plan: Plan & { daysRemaining: number }) {
-    setSendingId(plan.id);
+  async function confirmSendPlanEmail() {
+    if (!previewPlan) return;
+    setSendingId(previewPlan.id);
     try {
       await fetch("/api/email/reminder", {
         method: "POST",
         body: JSON.stringify({
-          clientName: plan.client_name,
-          planName: plan.plan_type,
-          daysRemaining: plan.daysRemaining,
-          expiryDate: plan.end_date,
+          clientName: previewPlan.client_name,
+          clientEmail: previewPlan.client_email,
+          planName: previewPlan.plan_name || previewPlan.plan_type,
+          daysRemaining: previewPlan.daysRemaining,
+          expiryDate: previewPlan.end_date,
         }),
       });
-      setRemindedIds((prev) => new Set(prev).add(plan.id));
+      setRemindedIds((prev) => new Set(prev).add(previewPlan.id));
     } catch (err) {
       console.error("Erro ao enviar email:", err);
     } finally {
       setSendingId(null);
+      setPreviewPlan(null);
     }
   }
 
@@ -1114,7 +1120,7 @@ export default function AdminPage() {
                     Adicionar Plano
                   </h3>
                   <form onSubmit={handleAddPlan}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-400 mb-2">
                           Nome do Cliente
@@ -1141,7 +1147,40 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-400 mb-2">
-                          Tipo de Plano
+                          WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          value={planPhone}
+                          onChange={(e) => setPlanPhone(e.target.value)}
+                          placeholder="(11) 98834-6626"
+                          className={fieldClasses}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          Plano
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={planPlanName}
+                            onChange={(e) => setPlanPlanName(e.target.value)}
+                            className={`${fieldClasses} pr-10`}
+                          >
+                            <option value="Basico">Basico</option>
+                            <option value="Premium">Premium</option>
+                            <option value="VIP">VIP</option>
+                          </select>
+                          <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <Icon size={16}>
+                              <path d="m6 9 6 6 6-6" />
+                            </Icon>
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                          Periodo
                         </label>
                         <div className="relative">
                           <select
@@ -1254,7 +1293,7 @@ export default function AdminPage() {
                       </thead>
                       <tbody>
                         {plansWithMeta.map((plan) => {
-                          const totalDays = PLAN_DURATIONS[plan.plan_type];
+                          const totalDays = PLAN_DURATIONS[plan.plan_type as PlanType];
                           const elapsed = totalDays - plan.daysRemaining;
                           const percent = Math.max(
                             0,
@@ -1276,9 +1315,14 @@ export default function AdminPage() {
                             >
                             <td className="px-4 md:px-6 py-4 font-medium text-white">
                               {plan.client_name}
+                              {plan.client_phone && (
+                                <div className="text-xs text-gray-500">{plan.client_phone}</div>
+                              )}
                             </td>
                             <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">
-                              {plan.plan_type}
+                              <span className="text-brand-orange font-medium">{plan.plan_name || "—"}</span>
+                              <br />
+                              <span className="text-xs">{plan.plan_type}</span>
                             </td>
                             <td className="px-4 md:px-6 py-4 text-brand-orange font-medium whitespace-nowrap">
                               R$ {plan.amount_paid.toFixed(2)}
@@ -1324,7 +1368,7 @@ export default function AdminPage() {
                               </td>
                               <td className="px-4 md:px-6 py-4">
                                 <button
-                                  onClick={() => sendPlanEmail(plan)}
+                                  onClick={() => setPreviewPlan(plan)}
                                   disabled={reminded || sendingId === plan.id}
                                   className={`flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-xl text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
                                     reminded
@@ -1478,6 +1522,72 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+
+      {previewPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setPreviewPlan(null)}>
+          <div className="bg-brand-dark rounded-2xl p-6 md:p-8 border border-[var(--border-main)] max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Previa do Email</h3>
+              <button onClick={() => setPreviewPlan(null)} className="text-gray-400 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <Icon size={20}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>
+              </button>
+            </div>
+
+            <div className="rounded-xl overflow-hidden border border-white/10 mb-6">
+              <div style={{background:"linear-gradient(135deg,#F97316,#F59E0B)",padding:"24px",textAlign:"center"}}>
+                <h1 style={{color:"#0a0a0a",margin:0,fontSize:"20px",fontWeight:800}}>Barbearia Dreamer</h1>
+                <p style={{color:"#0a0a0a",margin:"4px 0 0",opacity:0.8,fontSize:"13px"}}>Seu Estilo, Nossa Arte</p>
+              </div>
+              <div style={{background:"#111111",padding:"24px"}}>
+                <div style={{textAlign:"center",marginBottom:"20px"}}>
+                  <div style={{width:"48px",height:"48px",background:"rgba(249,115,22,0.2)",borderRadius:"50%",margin:"0 auto 12px"}}>
+                    <span style={{color:"#F97316",fontSize:"22px",lineHeight:"48px"}}>&#9888;</span>
+                  </div>
+                  <h2 style={{color:"#ffffff",margin:0,fontSize:"18px"}}>Seu plano esta acabando!</h2>
+                  <p style={{color:"#9CA3AF",margin:"6px 0 0",fontSize:"13px"}}>Nao deixe seu estilo para tras</p>
+                </div>
+
+                <p style={{color:"#D1D5DB",fontSize:"13px",lineHeight:"20px",textAlign:"center",margin:"0 0 20px"}}>
+                  Ola <strong style={{color:"#ffffff"}}>{previewPlan.client_name}</strong>, seu plano
+                  <strong style={{color:"#F97316"}}> {previewPlan.plan_name || previewPlan.plan_type}</strong> termina em
+                  <strong style={{color:"#F97316"}}> {Math.max(0, previewPlan.daysRemaining)} dias</strong> ({formatDateBR(previewPlan.end_date)}).
+                  Nao se esqueca de renovar!
+                </p>
+
+                <div style={{background:"#0a0a0a",borderRadius:"10px",border:"1px solid rgba(255,255,255,0.05)",padding:"16px",marginBottom:"20px"}}>
+                  <table style={{width:"100%"}}>
+                    <tbody>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Cliente</td><td style={{padding:"6px 0",color:"#ffffff",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{previewPlan.client_name}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Plano</td><td style={{padding:"6px 0",color:"#F97316",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{previewPlan.plan_name || previewPlan.plan_type}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Dias restantes</td><td style={{padding:"6px 0",color:"#F97316",fontSize:"14px",fontWeight:700,textAlign:"right"}}>{Math.max(0, previewPlan.daysRemaining)}</td></tr>
+                      <tr><td colSpan={2}><hr style={{border:"none",borderTop:"1px solid rgba(255,255,255,0.05)",margin:0}}/></td></tr>
+                      <tr><td style={{padding:"6px 0",color:"#6B7280",fontSize:"12px"}}>Data de expiracao</td><td style={{padding:"6px 0",color:"#ffffff",fontSize:"13px",fontWeight:600,textAlign:"right"}}>{formatDateBR(previewPlan.end_date)}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPreviewPlan(null)}
+                className="flex-1 min-h-[44px] px-4 py-3 bg-white/5 text-gray-300 rounded-xl hover:bg-white/10 transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmSendPlanEmail}
+                disabled={sendingId === previewPlan.id}
+                className="flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-brand-orange text-brand-black rounded-xl font-semibold hover:bg-brand-orange-dark transition-colors disabled:opacity-50"
+              >
+                {sendingId === previewPlan.id ? "Enviando..." : "Confirmar Envio"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

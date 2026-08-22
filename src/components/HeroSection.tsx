@@ -48,7 +48,7 @@ export default function HeroSection() {
             href="#scheduling"
             className="group flex items-center justify-center gap-2 px-8 py-4 bg-brand-orange text-brand-black rounded-full font-bold text-lg hover:bg-brand-orange-light transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]"
           >
-            Agendar Horario
+            Agendar Horário
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -69,7 +69,7 @@ export default function HeroSection() {
             href="#services"
             className="flex items-center justify-center gap-2 px-8 py-4 bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-main)] rounded-full font-bold text-lg hover:bg-[var(--bg-subtle-hover)] transition-colors"
           >
-            Ver Servicos
+            Ver Serviços
           </a>
         </div>
 
@@ -93,7 +93,7 @@ export default function HeroSection() {
               </svg>
             </div>
             <h3 className="text-[var(--text-primary)] font-semibold text-lg mb-2">Pontual</h3>
-            <p className="text-[var(--text-secondary)] text-sm">Respeitamos seu horario</p>
+            <p className="text-[var(--text-secondary)] text-sm">Respeitamos seu horário</p>
           </div>
 
           <div className="flex flex-col items-center md:items-start p-6 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] hover:border-brand-orange/30 transition-colors">
@@ -106,7 +106,7 @@ export default function HeroSection() {
               </svg>
             </div>
             <h3 className="text-[var(--text-primary)] font-semibold text-lg mb-2">Ambiente Top</h3>
-            <p className="text-[var(--text-secondary)] text-sm">Espaco moderno e confortavel</p>
+            <p className="text-[var(--text-secondary)] text-sm">Espaço moderno e confortável</p>
           </div>
         </div>
       </div>

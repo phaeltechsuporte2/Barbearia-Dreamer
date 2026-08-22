@@ -1,4 +1,5 @@
 const LOGO_URL = "https://barbearia-dreamer-gules.vercel.app/images/logo-email.jpg";
+const SITE_URL = "https://barbearia-dreamer-gules.vercel.app";
 
 export function formatBRDate(isoDate: string): string {
   const [y, m, d] = isoDate.split("-");
@@ -90,22 +91,22 @@ export function buildPlanActivatedEmail(data: {
     </div>
 
     <p style="color:#D1D5DB;font-size:14px;line-height:22px;text-align:center;margin:0 0 25px;">
-      Ola <strong style="color:#ffffff;">${clientName}</strong>! Seu plano
-      <strong style="color:#F97316;">${planName}</strong> (${planType}) esta ativo.
-      Aproveite todos os beneficios ate <strong style="color:#F97316;">${endDate}</strong>.
+      Olá <strong style="color:#ffffff;">${clientName}</strong>! Seu plano
+      <strong style="color:#F97316;">${planName}</strong> (${planType}) está ativo.
+      Aproveite todos os benefícios até <strong style="color:#F97316;">${endDate}</strong>.
     </p>
 
     ${infoTable([
       ["Cliente", clientName],
       ["Plano", planName, "#F97316"],
-      ["Periodo", planType],
+      ["Período", planType],
       ["Valor pago", `R$ ${amountPaid.toFixed(2).replace(".", ",")}`],
-      ["Inicio", startDate],
-      ["Valido ate", endDate],
+      ["Início", startDate],
+      ["Válido até", endDate],
     ])}
 
     <div style="text-align:center;">
-      <p style="color:#6B7280;font-size:12px;margin:0;">Ate logo na Barbearia Dreamer!</p>
+      <p style="color:#6B7280;font-size:12px;margin:0;">Até logo na Barbearia Dreamer!</p>
     </div>
   `;
   return shell(inner);
@@ -123,27 +124,70 @@ export function buildReminderEmail(data: {
       <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
         <span style="color:#F97316;font-size:28px;line-height:60px;">&#9888;</span>
       </div>
-      <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu plano esta acabando!</h2>
-      <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Nao deixe seu estilo para tras</p>
+      <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu plano está acabando!</h2>
+      <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Não deixe seu estilo para trás</p>
     </div>
 
     <p style="color:#D1D5DB;font-size:14px;line-height:22px;text-align:center;margin:0 0 25px;">
-      Ola <strong style="color:#ffffff;">${clientName}</strong>, seu plano
+      Olá <strong style="color:#ffffff;">${clientName}</strong>, seu plano
       <strong style="color:#F97316;">${planName}</strong> termina em
       <strong style="color:#F97316;">${daysRemaining} dias</strong> (${expiryDate}).
-      Nao se esqueca de renovar para continuar aproveitando nossos servicos!
+      Não se esqueça de renovar para continuar aproveitando nossos serviços!
     </p>
 
     ${infoTable([
       ["Cliente", clientName],
       ["Plano", planName, "#F97316"],
       ["Dias restantes", String(daysRemaining), "#F97316"],
-      ["Data de expiracao", expiryDate],
+      ["Data de expiração", expiryDate],
     ])}
 
     <div style="text-align:center;">
       <p style="color:#6B7280;font-size:12px;margin:0;">Renove agora e continue no estilo Barbearia Dreamer!</p>
     </div>
+  `;
+  return shell(inner);
+}
+
+export function buildFeedbackRequestEmail(data: {
+  clientName: string;
+  serviceName: string;
+  dateBR: string;
+}): string {
+  const { clientName, serviceName, dateBR } = data;
+  const inner = `
+    <div style="text-align:center;margin-bottom:30px;">
+      <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
+        <span style="color:#F97316;font-size:28px;line-height:60px;">&#9986;</span>
+      </div>
+      <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu corte já foi feito!</h2>
+      <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Esperamos que esteja amando o resultado</p>
+    </div>
+
+    <p style="color:#D1D5DB;font-size:14px;line-height:22px;text-align:center;margin:0 0 25px;">
+      Olá <strong style="color:#ffffff;">${clientName}</strong>! Seu
+      <strong style="color:#F97316;">${serviceName}</strong> de
+      <strong style="color:#ffffff;">${dateBR}</strong> foi concluído.
+      Queremos saber como ficou: deixe sua avaliação e ajude outros clientes a conhecerem nosso trabalho!
+    </p>
+
+    ${infoTable([
+      ["Cliente", clientName],
+      ["Serviço", serviceName, "#F97316"],
+      ["Data", dateBR],
+    ])}
+
+    <div style="text-align:center;margin-bottom:18px;">
+      <a
+        href="${SITE_URL}/#reviews"
+        style="display:inline-block;background:linear-gradient(135deg,#F97316,#F59E0B);color:#0a0a0a;font-size:15px;font-weight:800;padding:14px 36px;border-radius:999px;text-decoration:none;"
+      >Deixar minha avaliação</a>
+    </div>
+
+    <p style="color:#4B5563;font-size:11px;text-align:center;margin:0 0 20px;">
+      Se o botão não funcionar, copie e cole no navegador:<br />
+      <span style="color:#9CA3AF;">${SITE_URL}/#reviews</span>
+    </p>
   `;
   return shell(inner);
 }
@@ -160,9 +204,9 @@ export function buildWelcomeEmail(name: string | null): string {
     </div>
 
     <p style="color:#D1D5DB;font-size:14px;line-height:22px;text-align:center;margin:0 0 25px;">
-      Ola${displayName ? ` <strong style="color:#ffffff;">${displayName}</strong>` : ""}! Obrigado por criar sua conta na
-      <strong style="color:#F97316;">Barbearia Dreamer</strong>. Agora voce pode agendar seus cortes,
-      assinar planos exclusivos e acompanhar tudo em um so lugar.
+      Olá${displayName ? ` <strong style="color:#ffffff;">${displayName}</strong>` : ""}! Obrigado por criar sua conta na
+      <strong style="color:#F97316;">Barbearia Dreamer</strong>. Agora você pode agendar seus cortes,
+      assinar planos exclusivos e acompanhar tudo em um só lugar.
     </p>
 
     <div style="text-align:center;">

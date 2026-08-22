@@ -135,7 +135,7 @@ export default function SchedulingSection() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               summary: `${service.name} - ${clientName}`,
-              description: `Barbeiro: ${barber.name}\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServico: ${service.name}\nValor: R$ ${service.price}`,
+              description: `Barbeiro: ${barber.name}\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${service.name}\nValor: R$ ${service.price}`,
               date: selectedDate,
               time: selectedTime,
               durationMinutes: service.duration_minutes,
@@ -225,8 +225,8 @@ export default function SchedulingSection() {
                 <line x1="15" x2="3" y1="12" y2="12" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faca Login para Agendar</h3>
-            <p className="text-[var(--text-secondary)] mb-6">Voce precisa estar logado para fazer um agendamento.</p>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faça Login para Agendar</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Você precisa estar logado para fazer um agendamento.</p>
             <div className="flex flex-col gap-3">
               <Link href="/auth/login" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
                 Entrar
@@ -252,10 +252,10 @@ export default function SchedulingSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 animate-fade-in-up">
             Agende seu{" "}
-            <span className="text-brand-orange">Horario</span>
+            <span className="text-brand-orange">Horário</span>
           </h2>
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto animate-fade-in-up delay-100">
-            Escolha o melhor horario para voce. Horarios atualizados em tempo
+            Escolha o melhor horário para você. Horários atualizados em tempo
             real.
           </p>
           {calendarConnected && (
@@ -303,7 +303,7 @@ export default function SchedulingSection() {
 
                 <div>
                   <label className="block text-[var(--text-primary)] font-semibold mb-3">
-                    Servico
+                    Serviço
                   </label>
                   <select
                     value={selectedServiceId || ""}
@@ -313,7 +313,7 @@ export default function SchedulingSection() {
                     className="w-full px-4 py-3 bg-brand-black border border-[var(--border-main)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-brand-orange/50 transition-colors"
                     required
                   >
-                    <option value="">Selecione o servico</option>
+                    <option value="">Selecione o serviço</option>
                     {services.map((service) => (
                       <option key={service.id} value={service.id}>
                         {service.name} - R$ {service.price} (
@@ -365,7 +365,7 @@ export default function SchedulingSection() {
 
                 <div>
                   <label className="block text-[var(--text-primary)] font-semibold mb-3">
-                    Horario
+                    Horário
                     {loadingSlots && (
                       <span className="text-brand-orange text-sm font-normal ml-2">
                         Atualizando...
@@ -374,13 +374,13 @@ export default function SchedulingSection() {
                   </label>
                   {!selectedDate ? (
                     <div className="text-center py-8 text-[var(--text-muted)]">
-                      Selecione uma data para ver os horarios disponiveis
+                      Selecione uma data para ver os horários disponíveis
                     </div>
                   ) : loadingSlots ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="w-6 h-6 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
                       <span className="ml-3 text-[var(--text-secondary)]">
-                        Carregando horarios...
+                        Carregando horários...
                       </span>
                     </div>
                   ) : (
@@ -415,11 +415,11 @@ export default function SchedulingSection() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-green-500/15 border border-green-500/30" />
-                        <span className="text-[var(--text-muted)]">Disponivel</span>
+                        <span className="text-[var(--text-muted)]">Disponível</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded bg-gray-800 border border-gray-700" />
-                        <span className="text-[var(--text-muted)]">Indisponivel</span>
+                        <span className="text-[var(--text-muted)]">Indisponível</span>
                       </div>
                     </div>
                   )}
@@ -440,7 +440,7 @@ export default function SchedulingSection() {
                 <p className="text-center text-[var(--text-muted)] text-sm mt-4">
                   {calendarConnected
                     ? "Sincronizado com Google Calendar"
-                    : "Seu horario sera salvo automaticamente"}
+                    : "Seu horário será salvo automaticamente"}
                 </p>
               </div>
             </div>
@@ -450,16 +450,16 @@ export default function SchedulingSection() {
           open={showConfirm}
           onClose={resetForm}
           title="Agendamento Confirmado!"
-          message={`Seu horario foi agendado com sucesso${
+          message={`Seu horário foi agendado com sucesso${
             calendarConnected ? " e sincronizado com o Google Calendar" : ""
-          }. Aguardamos voce!`}
+          }. Aguardamos você!`}
           actionLabel="Fazer Novo Agendamento"
           onAction={resetForm}
         >
           <div className="bg-[var(--bg-subtle)] rounded-xl p-4 text-left">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <span className="text-[var(--text-muted)]">Servico:</span>
+                <span className="text-[var(--text-muted)]">Serviço:</span>
               </div>
               <div className="text-[var(--text-primary)] font-medium">
                 {getSelectedServiceName()}
@@ -479,7 +479,7 @@ export default function SchedulingSection() {
                 )}
               </div>
               <div>
-                <span className="text-[var(--text-muted)]">Horario:</span>
+                <span className="text-[var(--text-muted)]">Horário:</span>
               </div>
               <div className="text-[var(--text-primary)] font-medium">{selectedTime}</div>
             </div>

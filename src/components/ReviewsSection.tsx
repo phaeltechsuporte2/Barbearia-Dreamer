@@ -153,7 +153,7 @@ export default function ReviewsSection() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      setFormError("Foto muito grande (max 5MB).");
+      setFormError("Foto muito grande (máx 5MB).");
       return;
     }
     const reader = new FileReader();
@@ -188,7 +188,7 @@ export default function ReviewsSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) {
-      setFormError("Nome e obrigatorio.");
+      setFormError("Nome é obrigatório.");
       return;
     }
     if (formRating === 0) {
@@ -243,7 +243,7 @@ export default function ReviewsSection() {
       setFormPhoto(null);
       setFormPreview(null);
     } catch (err: unknown) {
-      console.error("Erro ao enviar avaliacao:", err);
+      console.error("Erro ao enviar avaliação:", err);
       const msg = err instanceof Error ? err.message : String(err);
       setFormError("Erro: " + msg);
     } finally {
@@ -255,8 +255,8 @@ export default function ReviewsSection() {
     <ConfirmationModal
       open={formSent}
       onClose={() => setFormSent(false)}
-      title="Avaliacao Enviada!"
-      message="Obrigado! Sua avaliacao sera exibida no site apos a aprovacao do admin."
+      title="Avaliação Enviada!"
+      message="Obrigado! Sua avaliação será exibida no site após a aprovação do admin."
       actionLabel="Ok"
     />
   );
@@ -267,10 +267,10 @@ export default function ReviewsSection() {
         <div className="container mx-auto px-6 md:px-12">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
-              Avaliacoes dos Clientes
+              Avaliações dos Clientes
             </h2>
             <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
-              Seja o primeiro a deixar sua avaliacao!
+              Seja o primeiro a deixar sua avaliação!
             </p>
           </div>
           <ReviewForm
@@ -301,11 +301,11 @@ export default function ReviewsSection() {
   const review = reviews[current];
 
   return (
-    <section className="py-20 bg-[var(--bg-primary)]">
+    <section id="reviews" className="py-20 bg-[var(--bg-primary)] scroll-mt-20">
       <div className="container mx-auto px-6 md:px-12">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
-            Avaliacoes dos Clientes
+            Avaliações dos Clientes
           </h2>
           <p className="text-[var(--text-secondary)] max-w-xl mx-auto">
             O que nossos clientes dizem sobre o nosso trabalho
@@ -479,7 +479,7 @@ function ReviewForm({
   return (
     <div className="max-w-lg mx-auto bg-[var(--bg-subtle)] border border-[var(--border-main)] rounded-2xl p-8">
       <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6 text-center">
-        Deixe sua Avaliacao
+        Deixe sua Avaliação
       </h3>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -521,7 +521,7 @@ function ReviewForm({
           </label>
           <label className="flex items-center justify-center gap-2 min-h-[44px] rounded-xl bg-white/5 border border-dashed border-white/10 px-4 py-3 text-gray-400 hover:border-brand-orange/40 hover:text-brand-orange transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-            {formPreview ? "Foto selecionada" : "Escolher foto (max 5MB)"}
+            {formPreview ? "Foto selecionada" : "Escolher foto (máx 5MB)"}
             <input
               type="file"
               accept="image/*"
@@ -552,12 +552,12 @@ function ReviewForm({
 
         <div>
           <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-            Comentario (opcional)
+            Comentário (opcional)
           </label>
           <textarea
             value={formComment}
             onChange={(e) => setFormComment(e.target.value)}
-            placeholder="Conte sua experiencia..."
+            placeholder="Conte sua experiência..."
             rows={3}
             className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-brand-orange/60 focus:ring-2 focus:ring-brand-orange/20 transition-colors resize-none"
           />

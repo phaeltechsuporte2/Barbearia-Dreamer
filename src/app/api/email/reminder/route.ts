@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     await sendGmail(
       clientEmail,
-      `${clientName}, seu plano ${planName} esta acabando!`,
+      `${clientName}, seu plano ${planName} está acabando!`,
       htmlContent
     );
 

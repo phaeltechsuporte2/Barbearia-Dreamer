@@ -7,10 +7,10 @@ import { useAuth } from "@/lib/AuthContext";
 
 function translateError(message: string) {
   if (message.includes("Invalid login credentials")) {
-    return "Email ou senha incorretos.";
+    return "E-mail ou senha incorretos.";
   }
   if (message.includes("Email not confirmed")) {
-    return "Email nao confirmado. Verifique sua caixa de entrada.";
+    return "E-mail não confirmado. Verifique sua caixa de entrada.";
   }
   if (message.includes("Too many requests")) {
     return "Muitas tentativas. Tente novamente em instantes.";
@@ -49,7 +49,7 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
     } catch {
-      setError("Nao foi possivel entrar com Google. Tente novamente.");
+      setError("Não foi possível entrar com Google. Tente novamente.");
       setGoogleLoading(false);
     }
   }
@@ -82,7 +82,7 @@ export default function LoginPage() {
             inputMode="email"
             autoComplete="email"
             required
-            placeholder="Seu email"
+            placeholder="Seu e-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 min-h-[44px] bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-brand-orange/50 focus:outline-none transition-colors"
@@ -246,7 +246,7 @@ export default function LoginPage() {
             </Link>
           </p>
           <p className="text-gray-400">
-            Nao tem conta?{" "}
+            Não tem conta?{" "}
             <Link
               href="/auth/register"
               className="text-brand-orange hover:text-brand-orange-light transition-colors"

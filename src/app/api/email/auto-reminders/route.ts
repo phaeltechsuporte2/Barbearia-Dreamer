@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
       await sendGmail(
         plan.client_email,
-        `${plan.client_name}, seu plano ${plan.plan_name} esta acabando!`,
+        `${plan.client_name}, seu plano ${plan.plan_name} está acabando!`,
         buildReminderEmail({
           clientName: plan.client_name,
           planName: plan.plan_name,

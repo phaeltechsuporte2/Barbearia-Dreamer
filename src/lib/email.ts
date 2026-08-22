@@ -70,7 +70,7 @@ export async function sendConfirmationEmail(data: EmailData) {
                           </tr>
                           <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
-                            <td style="padding:8px 0;color:#6B7280;font-size:13px;">Servico</td>
+                            <td style="padding:8px 0;color:#6B7280;font-size:13px;">Serviço</td>
                             <td style="padding:8px 0;color:#F97316;font-size:14px;font-weight:600;text-align:right;">${data.serviceName}</td>
                           </tr>
                           <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
@@ -85,7 +85,7 @@ export async function sendConfirmationEmail(data: EmailData) {
                           </tr>
                           <tr><td colspan="2"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0;"></td></tr>
                           <tr>
-                            <td style="padding:8px 0;color:#6B7280;font-size:13px;">Horario</td>
+                            <td style="padding:8px 0;color:#6B7280;font-size:13px;">Horário</td>
                             <td style="padding:8px 0;color:#22C55E;font-size:16px;font-weight:700;text-align:right;">${data.time}</td>
                           </tr>
                         </table>
@@ -94,7 +94,7 @@ export async function sendConfirmationEmail(data: EmailData) {
                   </table>
 
                   <div style="text-align:center;">
-                    <p style="color:#6B7280;font-size:12px;margin:0;">Aguardamos voce na Barbearia Dreamer!</p>
+                    <p style="color:#6B7280;font-size:12px;margin:0;">Aguardamos você na Barbearia Dreamer!</p>
                   </div>
                 </td>
               </tr>
@@ -119,7 +119,7 @@ export async function sendConfirmationEmail(data: EmailData) {
     );
     return { success: true };
   } catch (error) {
-    console.error("Erro ao enviar email:", error);
+    console.error("Erro ao enviar e-mail:", error);
     return { success: false, error };
   }
 }

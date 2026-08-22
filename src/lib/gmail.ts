@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 export async function sendGmail(to: string, subject: string, html: string) {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     throw new Error(
-      "Credenciais de e-mail nao configuradas (GMAIL_USER / GMAIL_APP_PASSWORD)"
+      "Credenciais de e-mail não configuradas (GMAIL_USER / GMAIL_APP_PASSWORD)"
     );
   }
   const text = html

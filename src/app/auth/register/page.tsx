@@ -6,13 +6,13 @@ import { useAuth } from "@/lib/AuthContext";
 
 function translateError(message: string) {
   if (message.includes("User already registered")) {
-    return "Este email ja esta cadastrado.";
+    return "Este e-mail já está cadastrado.";
   }
   if (message.includes("Password should be at least")) {
-    return "A senha deve ter no minimo 6 caracteres.";
+    return "A senha deve ter no mínimo 6 caracteres.";
   }
   if (message.includes("invalid") && message.toLowerCase().includes("email")) {
-    return "Email invalido.";
+    return "E-mail inválido.";
   }
   if (message.includes("Too many requests")) {
     return "Muitas tentativas. Tente novamente em instantes.";
@@ -38,12 +38,12 @@ export default function RegisterPage() {
     setSuccess(false);
 
     if (password.length < 6) {
-      setError("A senha deve ter no minimo 6 caracteres.");
+      setError("A senha deve ter no mínimo 6 caracteres.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -87,7 +87,7 @@ export default function RegisterPage() {
             role="status"
             className="mb-4 text-sm text-green-500 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3"
           >
-            Conta criada! Verifique seu email para confirmar.
+            Conta criada! Verifique seu e-mail para confirmar.
           </p>
         )}
 
@@ -107,7 +107,7 @@ export default function RegisterPage() {
             inputMode="email"
             autoComplete="email"
             required
-            placeholder="Seu email"
+            placeholder="Seu e-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 min-h-[44px] bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-brand-orange/50 focus:outline-none transition-colors"
@@ -119,7 +119,7 @@ export default function RegisterPage() {
               autoComplete="new-password"
               required
               minLength={6}
-              placeholder="Senha (minimo 6 caracteres)"
+              placeholder="Senha (mínimo 6 caracteres)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 pr-12 min-h-[44px] bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-brand-orange/50 focus:outline-none transition-colors"
@@ -262,7 +262,7 @@ export default function RegisterPage() {
         </form>
 
         <p className="mt-8 text-center text-sm text-gray-400">
-          Ja tem conta?{" "}
+          Já tem conta?{" "}
           <Link
             href="/auth/login"
             className="text-brand-orange hover:text-brand-orange-light transition-colors"

@@ -1,6 +1,6 @@
 const services = [
   {
-    name: "Corte Classico",
+    name: "Corte Clássico",
     description: "Corte masculino tradicional com acabamento perfeito.",
     price: "R$ 45",
     duration: "30 min",
@@ -25,7 +25,7 @@ const services = [
   },
   {
     name: "Barba Completa",
-    description: "Barba feita com navalha, hidratacao e acabamento.",
+    description: "Barba feita com navalha, hidratação e acabamento.",
     price: "R$ 35",
     duration: "25 min",
     icon: (
@@ -36,7 +36,7 @@ const services = [
   },
   {
     name: "Degradê",
-    description: "Degradê moderno com transicao suave e acabamento impecavel.",
+    description: "Degradê moderno com transição suave e acabamento impecável.",
     price: "R$ 55",
     duration: "40 min",
     icon: (
@@ -47,7 +47,7 @@ const services = [
   },
   {
     name: "Corte Infantil",
-    description: "Corte para criancas com atendimento especial e divertido.",
+    description: "Corte para crianças com atendimento especial e divertido.",
     price: "R$ 30",
     duration: "25 min",
     icon: (
@@ -72,8 +72,8 @@ const services = [
     ),
   },
   {
-    name: "Hidratacao Capilar",
-    description: "Tratamento completo para deixar o cabelo saudavel e macio.",
+    name: "Hidratação Capilar",
+    description: "Tratamento completo para deixar o cabelo saudável e macio.",
     price: "R$ 40",
     duration: "30 min",
     icon: (
@@ -83,8 +83,8 @@ const services = [
     ),
   },
   {
-    name: "Pigmentacao",
-    description: "Pigmentacao para cobertura de fios brancos ou destaque.",
+    name: "Pigmentação",
+    description: "Pigmentação para cobertura de fios brancos ou destaque.",
     price: "R$ 50",
     duration: "35 min",
     icon: (
@@ -104,10 +104,10 @@ export default function ServicesSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 animate-fade-in-up">
             Nossos{" "}
-            <span className="text-brand-orange">Servicos</span>
+            <span className="text-brand-orange">Serviços</span>
           </h2>
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto animate-fade-in-up delay-100">
-            Oferecemos uma linha completa de servicos para cuidar do seu visual
+            Oferecemos uma linha completa de serviços para cuidar do seu visual
             com qualidade e estilo.
           </p>
         </div>

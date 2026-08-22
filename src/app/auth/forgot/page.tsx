@@ -39,7 +39,7 @@ export default function ForgotPage() {
           />
           <h1 className="text-3xl font-bold text-white">Recuperar Senha</h1>
           <p className="text-gray-400 mt-1 text-center">
-            Enviamos um link para redefinir sua senha
+            Informe seu e-mail para receber o link de redefinição
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export default function ForgotPage() {
             inputMode="email"
             autoComplete="email"
             required
-            placeholder="Seu email"
+            placeholder="Seu e-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 min-h-[44px] bg-brand-black border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-brand-orange/50 focus:outline-none transition-colors"

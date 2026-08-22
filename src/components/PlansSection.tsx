@@ -35,12 +35,12 @@ const plans = [
     description: "Ideal para quem quer manter o visual em dia",
     monthlyPrice: 79.90,
     features: [
-      { text: "2 Cortes por mes", included: true },
-      { text: "1 Barba por mes", included: true },
+      { text: "2 Cortes por mês", included: true },
+      { text: "1 Barba por mês", included: true },
       { text: "Sobrancelha inclusa", included: true },
       { text: "Corte infantil", included: false },
-      { text: "Hidratacao capilar", included: false },
-      { text: "Pigmentacao", included: false },
+      { text: "Hidratação capilar", included: false },
+      { text: "Pigmentação", included: false },
       { text: "Prioridade no agendamento", included: false },
       { text: "Desconto em produtos", included: false },
     ],
@@ -52,12 +52,12 @@ const plans = [
     description: "O mais escolhido pelos nossos clientes",
     monthlyPrice: 149.90,
     features: [
-      { text: "4 Cortes por mes", included: true },
-      { text: "4 Barbas por mes", included: true },
+      { text: "4 Cortes por mês", included: true },
+      { text: "4 Barbas por mês", included: true },
       { text: "Sobrancelha inclusa", included: true },
       { text: "Corte infantil", included: true },
-      { text: "Hidratacao capilar", included: true },
-      { text: "Pigmentacao", included: false },
+      { text: "Hidratação capilar", included: true },
+      { text: "Pigmentação", included: false },
       { text: "Prioridade no agendamento", included: true },
       { text: "Desconto em produtos", included: false },
     ],
@@ -66,7 +66,7 @@ const plans = [
   },
   {
     name: "VIP",
-    description: "Experiencia completa e exclusiva",
+    description: "Experiência completa e exclusiva",
     monthlyPrice: 249.90,
     features: [
       { text: "Cortes ilimitados", included: true },
@@ -198,8 +198,8 @@ export default function PlansSection() {
                 <line x1="2" x2="22" y1="10" y2="10" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faca Login para Assinar</h3>
-            <p className="text-[var(--text-secondary)] mb-6">Voce precisa estar logado para assinar um plano.</p>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Faça Login para Assinar</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Você precisa estar logado para assinar um plano.</p>
             <div className="flex flex-col gap-3">
               <Link href="/auth/login" className="w-full min-h-[44px] flex items-center justify-center px-6 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
                 Entrar
@@ -229,7 +229,7 @@ export default function PlansSection() {
             Nossos <span className="text-brand-orange">Planos</span>
           </h2>
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto mb-10">
-            Economize assinando um plano. Quanto maior o periodo, maior o
+            Economize assinando um plano. Quanto maior o período, maior o
             desconto!
           </p>
 
@@ -443,7 +443,7 @@ export default function PlansSection() {
                 R$ {getPrice(plans.find((p) => p.name === selectedPlan)!.monthlyPrice, period).toFixed(2).replace(".", ",")}
               </p>
               <p className="text-[var(--text-muted)] text-xs mt-1">
-                {PLAN_DAYS[period]} dias de duracao
+                {PLAN_DAYS[period]} dias de duração
               </p>
             </div>
 
@@ -498,7 +498,7 @@ export default function PlansSection() {
         open={success}
         onClose={() => setSuccess(false)}
         title="Plano Cadastrado!"
-        message={`Seu plano ${successPlan} (${periodLabels[period]}) foi cadastrado com sucesso. Ate ja!`}
+        message={`Seu plano ${successPlan} (${periodLabels[period]}) foi cadastrado com sucesso. Até já!`}
         actionLabel="Ver Outros Planos"
       />
     </section>

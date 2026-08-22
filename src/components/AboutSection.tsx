@@ -15,24 +15,24 @@ export default function AboutSection() {
 
           <div className="w-full md:w-1/2 animate-fade-in-right">
             <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-6">
-              Bem-vindo a{" "}
+              Bem-vindo à{" "}
               <span className="text-brand-orange">Barbearia Dreamer</span>
             </h2>
             <div className="space-y-6 text-[var(--text-secondary)] text-lg leading-relaxed">
               <p>
-                Somos uma barbearia que nasceu da paixao por transformar visuais
-                e criar experiencias unicas. Aqui, cada corte e cada barba sao
+                Somos uma barbearia que nasceu da paixão por transformar visuais
+                e criar experiências únicas. Aqui, cada corte e cada barba são
                 tratados como uma obra de arte.
               </p>
               <p>
-                Nossa equipe de profissionais e constantemente capacitada para
-                trazer as tendencias mais modernas do mercado, sempre
+                Nossa equipe de profissionais é constantemente capacitada para
+                trazer as tendências mais modernas do mercado, sempre
                 respeitando o estilo e a personalidade de cada cliente.
               </p>
               <p>
                 Com um ambiente <strong className="text-brand-orange">acolhedor</strong> e{" "}
-                <strong className="text-brand-orange">modern</strong>, oferecemos
-                muito mais que um servico - oferecemos uma experiencia completa.
+                <strong className="text-brand-orange">moderno</strong>, oferecemos
+                muito mais que um serviço - oferecemos uma experiência completa.
                 Venha nos conhecer!
               </p>
             </div>

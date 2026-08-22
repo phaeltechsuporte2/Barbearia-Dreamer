@@ -8,12 +8,12 @@ export async function POST(request: NextRequest) {
     const { name, email } = body as { name?: string | null; email?: string };
 
     if (!email) {
-      return NextResponse.json({ error: "Email obrigatorio" }, { status: 400 });
+      return NextResponse.json({ error: "E-mail obrigatório" }, { status: 400 });
     }
 
     await sendGmail(
       email,
-      `Bem-vindo(a) a Barbearia Dreamer!`,
+      `Bem-vindo(a) à Barbearia Dreamer!`,
       buildWelcomeEmail(name ?? null)
     );
 

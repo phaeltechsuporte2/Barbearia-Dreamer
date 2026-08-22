@@ -17,14 +17,14 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-[var(--text-secondary)] text-center md:text-left max-w-sm">
-              Seu Estilo, Nosso Arte. Barbearia premium com atendimento de
+              Seu Estilo, Nossa Arte. Barbearia premium com atendimento de
               primeira linha.
             </p>
           </div>
 
           <div className="flex flex-col items-center md:items-start">
             <h4 className="text-[var(--text-primary)] font-semibold text-lg mb-4">
-              Links Rapidos
+              Links Rápidos
             </h4>
             <ul className="space-y-2 text-center md:text-left">
               <li>
@@ -32,7 +32,7 @@ export default function Footer() {
                   href="#home"
                   className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
-                  Inicio
+                  Início
                 </a>
               </li>
               <li>
@@ -48,7 +48,7 @@ export default function Footer() {
                   href="#services"
                   className="text-[var(--text-secondary)] hover:text-brand-orange transition-colors"
                 >
-                  Servicos
+                  Serviços
                 </a>
               </li>
               <li>
@@ -143,7 +143,7 @@ export default function Footer() {
             &copy; 2026 Barbearia Dreamer. Todos os direitos reservados.
           </p>
           <p className="text-[var(--text-muted)] text-xs text-center">
-            Horario de funcionamento: Seg-Sab 09:00 - 19:00
+            Horário de funcionamento: Seg-Sáb 09:00 - 19:00
           </p>
         </div>
       </div>

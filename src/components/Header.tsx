@@ -8,9 +8,9 @@ import { useTheme } from "@/lib/ThemeProvider";
 import { isAdminEmail } from "@/lib/admin";
 
 const NAV_LINKS = [
-  { href: "#home", label: "Inicio" },
+  { href: "#home", label: "Início" },
   { href: "#about", label: "Sobre" },
-  { href: "#services", label: "Servicos" },
+  { href: "#services", label: "Serviços" },
   { href: "#plans", label: "Planos" },
   { href: "#scheduling", label: "Agendamento" },
 ];
@@ -159,7 +159,7 @@ export default function Header() {
               <span
                 className={`font-medium ${isDark ? "text-white" : "text-gray-800"}`}
               >
-                Ola, {firstName}
+                Olá, {firstName}
               </span>
               <button
                 onClick={handleSignOut}

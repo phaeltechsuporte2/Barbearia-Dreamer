@@ -19,14 +19,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Barbearia Dreamer | Seu Estilo, Nosso Arte",
+  title: "Barbearia Dreamer | Seu Estilo, Nossa Arte",
   description:
-    "Barbearia premium com agendamento online, servicos de corte, barba e muito mais. Seu estilo, nossa arte.",
+    "Barbearia premium com agendamento online, serviços de corte, barba e muito mais. Seu estilo, nossa arte.",
   keywords:
     "Barbearia, Corte de Cabelo, Barba, Agendamento, Barbearia Dreamer, Corte Masculino",
   openGraph: {
     title: "Barbearia Dreamer",
-    description: "Seu Estilo, Nosso Arte",
+    description: "Seu Estilo, Nossa Arte",
     type: "website",
     locale: "pt_BR",
   },

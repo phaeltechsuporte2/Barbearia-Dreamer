@@ -273,7 +273,7 @@ export async function createReview(review: {
     console.error("Erro ao criar review:", error.message, error.details, error.hint);
     return { success: false as const, error: error.message };
   }
-  return { success: true as const, data: data as Review };
+  return { success: true as const };
 }
 
 export async function approveReview(id: string) {

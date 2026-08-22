@@ -160,7 +160,7 @@ export default function ReviewsSection() {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const maxSize = 800;
+        const maxSize = 400;
         let w = img.width;
         let h = img.height;
         if (w > maxSize || h > maxSize) {
@@ -176,7 +176,7 @@ export default function ReviewsSection() {
         canvas.height = h;
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, w, h);
-        setFormPreview(canvas.toDataURL("image/jpeg", 0.7));
+        setFormPreview(canvas.toDataURL("image/jpeg", 0.5));
       };
       img.src = reader.result as string;
     };
@@ -198,7 +198,7 @@ export default function ReviewsSection() {
     setFormSending(true);
 
     try {
-      let photoUrl = formPreview || undefined;
+      let photoUrl = "";
 
       if (formPreview && formPhoto) {
         const supabase = createClient();
@@ -218,15 +218,13 @@ export default function ReviewsSection() {
             .from("review-photos")
             .getPublicUrl(fileName);
           photoUrl = urlData.publicUrl;
-        } else {
-          console.warn("Storage upload falhou, usando base64:", uploadErr?.message);
         }
       }
 
       const result = await createReview({
         client_name: formName.trim(),
         instagram_handle: formInstagram.trim() || undefined,
-        photo_url: photoUrl,
+        photo_url: photoUrl || undefined,
         rating: formRating,
         comment: formComment.trim() || undefined,
       });

@@ -20,6 +20,8 @@ import {
 } from "@/lib/actions";
 import type { Appointment, Plan, Client, PlanCatalog, Review, SiteUser } from "@/lib/supabase";
 import { createClient as createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { useAuth } from "@/lib/AuthContext";
+import { isAdminEmail } from "@/lib/admin";
 
 type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes" | "clientes" | "avaliacoes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
@@ -248,6 +250,7 @@ const TAB_TITLES: Record<Tab, { title: string; subtitle: string }> = {
 };
 
 export default function AdminPage() {
+  const { user, loading: authLoading } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [stats, setStats] = useState({
     totalRevenue: 0,
@@ -716,10 +719,37 @@ export default function AdminPage() {
     `}</style>
   );
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-brand-black flex items-center justify-center">
         <div className="text-brand-orange text-xl">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdminEmail(user.email)) {
+    return (
+      <div className="min-h-screen bg-brand-black flex items-center justify-center px-4">
+        <div className="bg-brand-dark border border-white/5 rounded-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Acesso Restrito</h1>
+          <p className="text-gray-400 text-sm mb-6">
+            {user
+              ? "Esta conta nao tem permissao para acessar o painel administrativo."
+              : "Voce precisa entrar com uma conta autorizada para acessar o painel."}
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center px-6 py-3 min-h-[44px] rounded-full bg-brand-orange text-brand-black font-bold hover:bg-brand-orange-light transition-colors"
+          >
+            Voltar ao Site
+          </Link>
+        </div>
       </div>
     );
   }

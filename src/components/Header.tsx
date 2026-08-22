@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { useTheme } from "@/lib/ThemeProvider";
+import { isAdminEmail } from "@/lib/admin";
 
 const NAV_LINKS = [
   { href: "#home", label: "Inicio" },
@@ -22,6 +23,7 @@ export default function Header() {
   const router = useRouter();
 
   const isDark = theme === "dark";
+  const isAdmin = isAdminEmail(user?.email);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -142,6 +144,18 @@ export default function Header() {
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-3">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className={`px-4 py-2 rounded-full border font-medium transition-colors ${
+                    isDark
+                      ? "border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"
+                      : "border-brand-orange text-brand-orange hover:bg-brand-orange/10"
+                  }`}
+                >
+                  Painel Admin
+                </Link>
+              )}
               <span
                 className={`font-medium ${isDark ? "text-white" : "text-gray-800"}`}
               >
@@ -270,13 +284,15 @@ export default function Header() {
               {isDark ? "Tema Claro" : "Tema Escuro"}
             </button>
 
-            <Link
-              href="/admin"
-              onClick={() => setMenuOpen(false)}
-              className={`w-full max-w-xs text-center py-3 rounded-full font-medium transition-colors ${navLinkColor}`}
-            >
-              Painel Admin
-            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setMenuOpen(false)}
+                className={`w-full max-w-xs text-center py-3 rounded-full font-medium transition-colors ${navLinkColor}`}
+              >
+                Painel Admin
+              </Link>
+            )}
 
             {!user ? (
               <>

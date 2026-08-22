@@ -18,7 +18,8 @@ import {
   denyReview,
   deleteReview,
 } from "@/lib/actions";
-import type { Appointment, Plan, Client, PlanCatalog, Review } from "@/lib/supabase";
+import type { Appointment, Plan, Client, PlanCatalog, Review, SiteUser } from "@/lib/supabase";
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes" | "clientes" | "avaliacoes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
@@ -306,6 +307,26 @@ export default function AdminPage() {
   }, [sendStatus]);
 
   const [allReviews, setAllReviews] = useState<Review[]>([]);
+
+  const [siteUsers, setSiteUsers] = useState<SiteUser[]>([]);
+
+  async function loadSiteUsers() {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("site_users")
+        .select("*")
+        .order("last_login", { ascending: false });
+      if (error) throw error;
+      setSiteUsers((data ?? []) as unknown as SiteUser[]);
+    } catch (err) {
+      console.error("Erro ao carregar usuarios do site:", err);
+    }
+  }
+
+  useEffect(() => {
+    loadSiteUsers();
+  }, []);
 
   async function loadData() {
     try {
@@ -1759,6 +1780,111 @@ export default function AdminPage() {
 
             {tab === "clientes" && (
               <div className="space-y-6">
+                <div className="bg-brand-dark rounded-2xl border border-white/5">
+                  <div className="p-4 md:p-6 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">
+                        Usuarios do Site
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Pessoas que entraram no site separadas por tipo de login
+                      </p>
+                    </div>
+                    <button
+                      onClick={loadSiteUsers}
+                      className="px-4 py-2 min-h-[44px] rounded-xl text-sm font-semibold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 hover:bg-brand-orange/20 transition-colors"
+                    >
+                      Atualizar
+                    </button>
+                  </div>
+
+                  {(() => {
+                    const googleUsers = siteUsers.filter((u) => u.provider === "google");
+                    const normalUsers = siteUsers.filter((u) => u.provider !== "google");
+                    const renderGroup = (title: string, users: SiteUser[], badge: ReactNode) => (
+                      <div className={title.includes("Google") ? "" : "border-t border-white/5"}>
+                        <div className="px-4 md:px-6 py-4 flex items-center gap-3">
+                          {badge}
+                          <h4 className="font-semibold text-white">{title}</h4>
+                          <span className="text-xs text-gray-500">({users.length})</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b border-white/5">
+                                <th className="text-left px-4 md:px-6 py-3 text-sm font-medium text-gray-500">Nome</th>
+                                <th className="text-left px-4 md:px-6 py-3 text-sm font-medium text-gray-500">Email</th>
+                                <th className="text-left px-4 md:px-6 py-3 text-sm font-medium text-gray-500">Telefone</th>
+                                <th className="text-left px-4 md:px-6 py-3 text-sm font-medium text-gray-500">Primeiro acesso</th>
+                                <th className="text-left px-4 md:px-6 py-3 text-sm font-medium text-gray-500">Ultimo acesso</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {users.map((u) => (
+                                <tr key={u.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                                  <td className="px-4 md:px-6 py-4 font-medium text-white">
+                                    <div className="flex items-center gap-3">
+                                      {u.avatar_url ? (
+                                        <img src={u.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                      ) : (
+                                        <div className="w-8 h-8 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center text-sm font-bold">
+                                          {(u.name || "?").charAt(0).toUpperCase()}
+                                        </div>
+                                      )}
+                                      {u.name || "Sem nome"}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">{u.email || "—"}</td>
+                                  <td className="px-4 md:px-6 py-4 text-gray-400 whitespace-nowrap">{u.phone || "—"}</td>
+                                  <td className="px-4 md:px-6 py-4 text-gray-500 whitespace-nowrap">
+                                    {new Date(u.first_login).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                  </td>
+                                  <td className="px-4 md:px-6 py-4 text-gray-500 whitespace-nowrap">
+                                    {new Date(u.last_login).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                  </td>
+                                </tr>
+                              ))}
+                              {users.length === 0 && (
+                                <tr>
+                                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                    Nenhum usuario por aqui ainda
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                    return (
+                      <>
+                        {renderGroup(
+                          "Entraram com Conta Google",
+                          googleUsers,
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white">
+                            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                              <path fill="#EA4335" d="M12 5.04c1.62 0 3.06.56 4.2 1.66l3.13-3.13C17.45 1.79 14.97.75 12 .75 7.6.75 3.8 3.27 1.96 6.96l3.66 2.84c.87-2.6 3.32-4.76 6.38-4.76z" />
+                              <path fill="#4285F4" d="M23.25 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.32-5.17 3.32-8.82z" />
+                              <path fill="#FBBC05" d="M5.62 14.2c-.22-.66-.35-1.37-.35-2.2s.13-1.54.35-2.2L1.96 6.96C1.15 8.46.75 10.18.75 12s.4 3.54 1.21 5.04l3.66-2.84z" />
+                              <path fill="#34A853" d="M12 23.25c3.04 0 5.6-1 7.46-2.72l-3.86-3c-1.07.72-2.44 1.15-3.6 1.15-3.06 0-5.51-2.16-6.38-4.76l-3.66 2.84c1.84 3.69 5.64 6.49 10.04 6.49z" />
+                            </svg>
+                          </span>
+                        )}
+                        {renderGroup(
+                          "Cadastro Normal (Email)",
+                          normalUsers,
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-orange/20 text-brand-orange">
+                            <Icon size={14}>
+                              <rect width="18" height="18" x="3" y="3" rx="2" />
+                              <path d="m3 7 9 6 9-6" />
+                            </Icon>
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+
                 <div className="bg-brand-dark rounded-2xl p-4 md:p-6 border border-white/5">
                   <h3 className="text-lg font-bold text-white mb-6">
                     Adicionar Cliente

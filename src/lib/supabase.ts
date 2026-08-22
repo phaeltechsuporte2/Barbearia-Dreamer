@@ -57,6 +57,18 @@ export interface Client {
   created_at: string;
 }
 
+export interface SiteUser {
+  id: string;
+  auth_user_id: string;
+  provider: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  first_login: string;
+  last_login: string;
+}
+
 export interface PlanCatalog {
   id: string;
   plan_name: string;

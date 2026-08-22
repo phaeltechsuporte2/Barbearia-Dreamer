@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendGmail } from "@/lib/gmail";
 
 interface ReminderData {
   clientName: string;
@@ -110,12 +108,11 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    await resend.emails.send({
-      from: "Barbearia Dreamer <onboarding@resend.dev>",
-      to: clientEmail,
-      subject: "Seu plano esta acabando!",
-      html: htmlContent,
-    });
+    await sendGmail(
+      clientEmail,
+      `${clientName}, seu plano ${planName} esta acabando!`,
+      htmlContent
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

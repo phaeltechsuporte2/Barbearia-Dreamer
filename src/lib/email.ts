@@ -1,6 +1,4 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendGmail } from "@/lib/gmail";
 
 interface EmailData {
   clientName: string;
@@ -112,12 +110,11 @@ export async function sendConfirmationEmail(data: EmailData) {
   `;
 
   try {
-    await resend.emails.send({
-      from: "Barbearia Dreamer <onboarding@resend.dev>",
-      to: "phael.techsuporte2@gmail.com",
-      subject: `Novo Agendamento - ${data.clientName} - ${data.serviceName}`,
-      html: htmlContent,
-    });
+    await sendGmail(
+      "phael.techsuporte2@gmail.com",
+      `Novo Agendamento - ${data.clientName} - ${data.serviceName}`,
+      htmlContent
+    );
     return { success: true };
   } catch (error) {
     console.error("Erro ao enviar email:", error);

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { createPlan } from "@/lib/actions";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 type Period = "mensal" | "trimestral" | "semestral" | "anual";
 
@@ -127,6 +128,7 @@ export default function PlansSection() {
   const [clientPhone, setClientPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successPlan, setSuccessPlan] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -165,6 +167,7 @@ export default function PlansSection() {
         end_date: addDays(today, PLAN_DAYS[period]),
       });
       setSuccess(true);
+      setSuccessPlan(planName);
       setSelectedPlan(null);
     } catch (err) {
       console.error(err);
@@ -205,27 +208,6 @@ export default function PlansSection() {
                 Criar Conta
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (success) {
-    return (
-      <section id="plans" className="py-24 bg-brand-black relative overflow-hidden">
-        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center">
-          <div className="max-w-md mx-auto bg-brand-dark rounded-2xl p-8 border border-green-500/30">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Plano Cadastrado!</h3>
-            <p className="text-[var(--text-secondary)] mb-6">Seu plano foi cadastrado com sucesso.</p>
-            <button onClick={() => setSuccess(false)} className="px-8 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all">
-              Ver Outros Planos
-            </button>
           </div>
         </div>
       </section>
@@ -444,7 +426,7 @@ export default function PlansSection() {
       </div>
 
       {selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setSelectedPlan(null); setError(""); }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => { setSelectedPlan(null); setError(""); }}>
           <div className="bg-brand-dark rounded-2xl p-6 md:p-8 border border-[var(--border-main)] max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-[var(--text-primary)]">
@@ -511,6 +493,14 @@ export default function PlansSection() {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        open={success}
+        onClose={() => setSuccess(false)}
+        title="Plano Cadastrado!"
+        message={`Seu plano ${successPlan} (${periodLabels[period]}) foi cadastrado com sucesso. Ate ja!`}
+        actionLabel="Ver Outros Planos"
+      />
     </section>
   );
 }

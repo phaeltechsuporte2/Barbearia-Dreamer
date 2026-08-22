@@ -5,6 +5,7 @@ import { createAppointment, getBarbers, getServices } from "@/lib/actions";
 import type { Barber, Service } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -190,6 +191,17 @@ export default function SchedulingSection() {
     "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
   ];
 
+  const resetForm = () => {
+    setShowConfirm(false);
+    setSelectedDate("");
+    setSelectedTime("");
+    setSelectedBarber(null);
+    setSelectedServiceId(null);
+    setClientName("");
+    setClientPhone("");
+    setAvailableSlots([]);
+  };
+
   if (authLoading) {
     return (
       <section id="scheduling" className="py-24 bg-brand-dark relative overflow-hidden">
@@ -256,77 +268,7 @@ export default function SchedulingSection() {
           )}
         </div>
 
-        {showConfirm ? (
-          <div className="max-w-lg mx-auto bg-brand-black rounded-2xl p-8 border border-brand-orange/30 text-center animate-fade-in-up">
-            <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#F97316"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
-              Agendamento Confirmado!
-            </h3>
-            <p className="text-[var(--text-secondary)] mb-6">
-              Seu horario foi agendado com sucesso
-              {calendarConnected && " e sincronizado com o Google Calendar"}.
-              Aguardamos voce!
-            </p>
-            <div className="bg-[var(--bg-subtle)] rounded-xl p-4 mb-6 text-left">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-[var(--text-muted)]">Servico:</span>
-                </div>
-                <div className="text-[var(--text-primary)] font-medium">
-                  {getSelectedServiceName()}
-                </div>
-                <div>
-                  <span className="text-[var(--text-muted)]">Barbeiro:</span>
-                </div>
-                <div className="text-[var(--text-primary)] font-medium">
-                  {getSelectedBarberName()}
-                </div>
-                <div>
-                  <span className="text-[var(--text-muted)]">Data:</span>
-                </div>
-                <div className="text-[var(--text-primary)] font-medium">
-                  {new Date(selectedDate + "T12:00:00").toLocaleDateString(
-                    "pt-BR"
-                  )}
-                </div>
-                <div>
-                  <span className="text-[var(--text-muted)]">Horario:</span>
-                </div>
-                <div className="text-[var(--text-primary)] font-medium">{selectedTime}</div>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setShowConfirm(false);
-                setSelectedDate("");
-                setSelectedTime("");
-                setSelectedBarber(null);
-                setSelectedServiceId(null);
-                setClientName("");
-                setClientPhone("");
-                setAvailableSlots([]);
-              }}
-              className="px-8 py-3 bg-brand-orange text-brand-black rounded-full font-bold hover:bg-brand-orange-light transition-all"
-            >
-              Fazer Novo Agendamento
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
@@ -503,7 +445,46 @@ export default function SchedulingSection() {
               </div>
             </div>
           </form>
-        )}
+
+        <ConfirmationModal
+          open={showConfirm}
+          onClose={resetForm}
+          title="Agendamento Confirmado!"
+          message={`Seu horario foi agendado com sucesso${
+            calendarConnected ? " e sincronizado com o Google Calendar" : ""
+          }. Aguardamos voce!`}
+          actionLabel="Fazer Novo Agendamento"
+          onAction={resetForm}
+        >
+          <div className="bg-[var(--bg-subtle)] rounded-xl p-4 text-left">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-[var(--text-muted)]">Servico:</span>
+              </div>
+              <div className="text-[var(--text-primary)] font-medium">
+                {getSelectedServiceName()}
+              </div>
+              <div>
+                <span className="text-[var(--text-muted)]">Barbeiro:</span>
+              </div>
+              <div className="text-[var(--text-primary)] font-medium">
+                {getSelectedBarberName()}
+              </div>
+              <div>
+                <span className="text-[var(--text-muted)]">Data:</span>
+              </div>
+              <div className="text-[var(--text-primary)] font-medium">
+                {new Date(selectedDate + "T12:00:00").toLocaleDateString(
+                  "pt-BR"
+                )}
+              </div>
+              <div>
+                <span className="text-[var(--text-muted)]">Horario:</span>
+              </div>
+              <div className="text-[var(--text-primary)] font-medium">{selectedTime}</div>
+            </div>
+          </div>
+        </ConfirmationModal>
       </div>
     </section>
   );

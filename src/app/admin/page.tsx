@@ -354,10 +354,45 @@
      }
    }
  
-   const loadDataRef = useRef(loadData);
-   loadDataRef.current = loadData;
- 
-   useEffect(() => {
+    const loadDataRef = useRef(loadData);
+    loadDataRef.current = loadData;
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    async function refreshTab(t: Tab) {
+      if (refreshing) return;
+      setRefreshing(true);
+      try {
+        if (t === "dashboard") {
+          const [appointmentsData, statsData] = await Promise.all([
+            getAppointments(),
+            getRevenueStats(),
+          ]);
+          setAppointments(appointmentsData);
+          setStats(statsData);
+        } else if (t === "agendamentos" || t === "historico") {
+          setAppointments(await getAppointments());
+        } else if (t === "planos" || t === "lembretes") {
+          setPlans(await getPlans());
+        } else if (t === "clientes") {
+          const [clientsData, catalogData] = await Promise.all([
+            getClients(),
+            getPlanCatalog(),
+          ]);
+          setClients(clientsData);
+          setPlanCatalog(catalogData);
+          await loadSiteUsers();
+        } else if (t === "avaliacoes") {
+          setAllReviews(await getAllReviews());
+        }
+      } catch (err) {
+        console.error("Erro ao atualizar:", err);
+      } finally {
+        setRefreshing(false);
+      }
+    }
+
+    useEffect(() => {
      loadData();
    }, []);
  
@@ -860,12 +895,19 @@
                  </p>
                </div>
              </div>
-             <button
-               onClick={loadData}
-               className="px-4 py-2 min-h-[44px] bg-brand-orange/10 text-brand-orange rounded-lg hover:bg-brand-orange/20 transition-colors text-sm font-medium shrink-0"
-             >
-               Atualizar
-             </button>
+              <button
+                onClick={() => refreshTab(tab)}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 min-h-[44px] bg-brand-orange/10 text-brand-orange rounded-lg hover:bg-brand-orange/20 transition-colors text-sm font-medium shrink-0 disabled:opacity-60 disabled:pointer-events-none"
+              >
+                <Icon size={16} className={refreshing ? "animate-spin" : ""}>
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                  <path d="M8 16H3v5" />
+                </Icon>
+                {refreshing ? "Atualizando..." : "Atualizar"}
+              </button>
            </div>
  
            <div key={tab} className="animate-fade-in-up">
@@ -2200,7 +2242,7 @@
                <div style={{background:"#111111",padding:"24px"}}>
                  <div style={{textAlign:"center",marginBottom:"20px"}}>
                    <div style={{width:"48px",height:"48px",background:"rgba(249,115,22,0.2)",borderRadius:"50%",margin:"0 auto 12px"}}>
-                     <span style={{color:"#F97316",fontSize:"22px",lineHeight:"48px"}}>&#9888;</span>
+                     <img src="/images/icons/icon-bell-orange.png" width="24" height="24" alt="" style={{display:"block",margin:"0 auto",paddingTop:"12px"}} />
                    </div>
                    <h2 style={{color:"#ffffff",margin:0,fontSize:"18px"}}>Seu plano está acabando!</h2>
                    <p style={{color:"#9CA3AF",margin:"6px 0 0",fontSize:"13px"}}>Não deixe seu estilo para trás</p>
@@ -2271,7 +2313,7 @@
                <div style={{background:"#111111",padding:"24px"}}>
                  <div style={{textAlign:"center",marginBottom:"20px"}}>
                    <div style={{width:"48px",height:"48px",background:"rgba(249,115,22,0.2)",borderRadius:"50%",margin:"0 auto 12px"}}>
-                     <span style={{color:"#F97316",fontSize:"22px",lineHeight:"48px"}}>&#9888;</span>
+                     <img src="/images/icons/icon-bell-orange.png" width="24" height="24" alt="" style={{display:"block",margin:"0 auto",paddingTop:"12px"}} />
                    </div>
                    <h2 style={{color:"#ffffff",margin:0,fontSize:"18px"}}>Seu plano está acabando!</h2>
                    <p style={{color:"#9CA3AF",margin:"6px 0 0",fontSize:"13px"}}>Não deixe seu estilo para trás</p>

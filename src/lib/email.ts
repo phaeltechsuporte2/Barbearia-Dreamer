@@ -49,7 +49,7 @@ export async function sendConfirmationEmail(data: EmailData) {
                 <td style="padding:30px;">
                   <div style="text-align:center;margin-bottom:30px;">
                     <div style="width:60px;height:60px;background-color:rgba(34,197,94,0.2);border-radius:50%;margin:0 auto 15px;">
-                      <span style="color:#22C55E;font-size:28px;line-height:60px;">&#10003;</span>
+                      <span style="color:#22C55E;font-size:28px;line-height:60px;"><img src="https://barbearia-dreamer-gules.vercel.app/images/icons/icon-check-green.png" width="28" height="28" alt="" style="display:block;margin:0 auto;padding-top:16px;" /></span>
                     </div>
                     <h2 style="color:#ffffff;margin:0;font-size:22px;">Agendamento Confirmado!</h2>
                     <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Um novo agendamento foi realizado</p>

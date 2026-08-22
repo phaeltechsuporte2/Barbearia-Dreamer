@@ -6,10 +6,12 @@ import ServicesSection from "@/components/ServicesSection";
 import PlansSection from "@/components/PlansSection";
 import SchedulingSection from "@/components/SchedulingSection";
 import ReviewsSection from "@/components/ReviewsSection";
+import HashScroll from "@/components/HashScroll";
 
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen bg-brand-black w-full">
+      <HashScroll />
       <Header />
       <HeroSection />
       <AboutSection />

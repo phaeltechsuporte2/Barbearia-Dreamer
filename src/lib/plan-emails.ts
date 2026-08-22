@@ -84,7 +84,7 @@ export function buildPlanActivatedEmail(data: {
   const inner = `
     <div style="text-align:center;margin-bottom:30px;">
       <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
-        <span style="color:#F97316;font-size:28px;line-height:60px;">&#10004;</span>
+        <span style="color:#F97316;font-size:28px;line-height:60px;"><img src="${SITE_URL}/images/icons/icon-check-orange.png" width="28" height="28" alt="" style="display:block;margin:0 auto;padding-top:16px;" /></span>
       </div>
       <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu plano foi ativado!</h2>
       <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Bem-vindo ao clube Dreamer</p>
@@ -122,7 +122,7 @@ export function buildReminderEmail(data: {
   const inner = `
     <div style="text-align:center;margin-bottom:30px;">
       <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
-        <span style="color:#F97316;font-size:28px;line-height:60px;">&#9888;</span>
+        <span style="color:#F97316;font-size:28px;line-height:60px;"><img src="${SITE_URL}/images/icons/icon-bell-orange.png" width="28" height="28" alt="" style="display:block;margin:0 auto;padding-top:16px;" /></span>
       </div>
       <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu plano está acabando!</h2>
       <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Não deixe seu estilo para trás</p>
@@ -158,7 +158,7 @@ export function buildFeedbackRequestEmail(data: {
   const inner = `
     <div style="text-align:center;margin-bottom:30px;">
       <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
-        <span style="color:#F97316;font-size:28px;line-height:60px;">&#9986;</span>
+        <span style="color:#F97316;font-size:28px;line-height:60px;"><img src="${SITE_URL}/images/icons/icon-scissors-orange.png" width="28" height="28" alt="" style="display:block;margin:0 auto;padding-top:16px;" /></span>
       </div>
       <h2 style="color:#ffffff;margin:0;font-size:22px;">Seu corte já foi feito!</h2>
       <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Esperamos que esteja amando o resultado</p>
@@ -197,7 +197,7 @@ export function buildWelcomeEmail(name: string | null): string {
   const inner = `
     <div style="text-align:center;margin-bottom:30px;">
       <div style="width:60px;height:60px;background-color:rgba(249,115,22,0.2);border-radius:50%;margin:0 auto 15px;">
-        <span style="color:#F97316;font-size:28px;line-height:60px;">&#128077;</span>
+        <span style="color:#F97316;font-size:28px;line-height:60px;"><img src="${SITE_URL}/images/icons/icon-thumbsup-orange.png" width="28" height="28" alt="" style="display:block;margin:0 auto;padding-top:16px;" /></span>
       </div>
       <h2 style="color:#ffffff;margin:0;font-size:22px;">Bem-vindo(a), ${displayName || "cliente"}!</h2>
       <p style="color:#9CA3AF;margin:8px 0 0;font-size:14px;">Sua conta foi criada com sucesso</p>

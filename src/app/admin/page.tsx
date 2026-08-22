@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import {
   createPlan as createPlanAction,
 } from "@/lib/actions";
 import type { Appointment, Plan } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-browser";
 
 type Tab = "dashboard" | "agendamentos" | "historico" | "planos" | "lembretes";
 type PlanType = "Mensal" | "Trimestral" | "Semestral" | "Anual";
@@ -248,10 +249,6 @@ export default function AdminPage() {
 
   const [previewPlan, setPreviewPlan] = useState<(Plan & { daysRemaining: number }) | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   async function loadData() {
     try {
       const [appointmentsData, statsData, plansData] = await Promise.all([
@@ -268,6 +265,44 @@ export default function AdminPage() {
       setLoading(false);
     }
   }
+
+  const loadDataRef = useRef(loadData);
+  loadDataRef.current = loadData;
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel("admin-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments" },
+        () => {
+          loadDataRef.current();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "plans" },
+        () => {
+          loadDataRef.current();
+        }
+      )
+      .subscribe();
+
+    const interval = setInterval(() => {
+      loadDataRef.current();
+    }, 30000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, []);
 
   async function handleStatusChange(
     id: string,

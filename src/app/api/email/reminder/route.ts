@@ -37,6 +37,12 @@ export async function POST(request: NextRequest) {
               <table width="600" cellpadding="0" cellspacing="0" style="background-color:#111111;border-radius:16px;border:1px solid rgba(249,115,22,0.2);overflow:hidden;">
                 <tr>
                   <td style="background: linear-gradient(135deg, #F97316, #F59E0B); padding:30px; text-align:center;">
+                    <img
+                      src="https://barbearia-dreamer-gules.vercel.app/images/logo.jpg"
+                      alt="Logo Barbearia Dreamer"
+                      width="100"
+                      style="display:block;margin:0 auto 14px;width:100px;height:auto;border-radius:12px;border:3px solid rgba(10,10,10,0.85);"
+                    />
                     <h1 style="color:#0a0a0a;margin:0;font-size:24px;font-weight:800;">Barbearia Dreamer</h1>
                     <p style="color:#0a0a0a;margin:5px 0 0;opacity:0.8;font-size:14px;">Seu Estilo, Nossa Arte</p>
                   </td>
